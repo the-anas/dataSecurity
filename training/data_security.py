@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
+from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, AdamW, Trainer, TrainingArguments, TrainerCallback
 from datasets import load_dataset
 from transformers import Trainer, TrainingArguments
 import pandas as pd
@@ -8,12 +8,62 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from datasets import Dataset
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+import logging
+import wandb
 
-EPOCHS = 10
+
+EPOCHS = 2
 LEARNING_RATE = 2e-5
+BATCH_SIZE = 16
+logging_dir = "./training_metrics_logs"
+
+
+# wandb set up
+wandb.login()
+run = wandb.init(
+    # Set the project where this run will be logged
+    project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+    # Track hyperparameters and run metadata
+    config={
+        "learning_rate": LEARNING_RATE,
+        "Batch_size": BATCH_SIZE,
+        "epochs": EPOCHS,
+    },
+)
+
+# set up logger
+logging.basicConfig(
+    filename=f"{logging_dir}/data_security_test_run.txt",  # Log file location
+    level=logging.INFO,  # Set the logging level
+    format="%(asctime)s - %(message)s",  # Log format
+)
+
+logger = logging.getLogger()
+
+# Custom callback to log metrics
+class LoggingCallback(TrainerCallback):
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        print(f"Metrics received in the callback: {metrics}")
+        if metrics:
+            epoch = state.epoch
+            eval_loss = metrics.get('eval_loss') # YOU CAN ADD    ,None as default here to avoid issues
+            accuracy = metrics.get('eval_accuracy')
+            precision = metrics.get('eval_precision')
+            recall = metrics.get('eval_recall')
+            f1 = metrics.get('eval_f1')
+            log_message = f"Epoch: {epoch}, Eval Loss: {eval_loss}, Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1: {f1}"
+            logger.info(log_message)  # Log metrics to the file
+
+        return control
+
+
+
 
 # Short exploration with pandas
 dataframe = pd.read_csv("./processed_data/Data_Security.csv")
+
+#rename column for huggingface API
+dataframe.rename(columns={'Security Measure': 'labels'}, inplace=True)
 
 # Encode labels and split data
 train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
@@ -22,10 +72,10 @@ train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
 encoder = LabelEncoder()
 
 # encode training dataset
-train_df['Security Measure'] = encoder.fit_transform(train_df['Security Measure'])
+train_df['labels'] = encoder.fit_transform(train_df['labels'])
 
 # Encode eval dataset
-eval_df['Security Measure'] = encoder.fit_transform(eval_df['Security Measure'])
+eval_df['labels'] = encoder.fit_transform(eval_df['labels'])
 
 # transform to huggingface dataset
 train_dataset = Dataset.from_pandas(train_df)
@@ -43,9 +93,9 @@ def tokenize_function(examples):
 train_tokenized_datasets = train_dataset.map(tokenize_function, batched=True)
 eval_tokenized_datasets = eval_dataset.map(tokenize_function, batched=True)
 
-# Prepare DataLoader
-small_train_dataset = train_tokenized_datasets.shuffle(seed=42).select(range(200))  # Small subset for example
-small_eval_dataset = eval_tokenized_datasets.shuffle(seed=42).select(range(100))
+# # Prepare DataLoader
+# small_train_dataset = train_tokenized_datasets.shuffle(seed=42).select(range(200))  # Small subset for example
+# small_eval_dataset = eval_tokenized_datasets.shuffle(seed=42).select(range(100))
 
 train_dataloader = DataLoader(train_tokenized_datasets, batch_size=8)
 test_dataloader = DataLoader(eval_tokenized_datasets, batch_size=8)
@@ -86,10 +136,11 @@ def compute_metrics(eval_pred):
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=train_dataset, # MAKE SURE YOU ARE USING CORRECT DATASET
-    eval_dataset=eval_dataset,  # MAKE SURE YOU ARE USING CORRECT DATASET
+    train_dataset=train_tokenized_datasets, # MAKE SURE YOU ARE USING CORRECT DATASET
+    eval_dataset=eval_tokenized_datasets,  # MAKE SURE YOU ARE USING CORRECT DATASET
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
+    callbacks = [LoggingCallback]
 )
 
 # Train the model

@@ -2,4 +2,7 @@ transformers
 datasets
 torch
 pandas
-sklearn 
+scikit-learn
+wandb
+numpy
+evaluate
