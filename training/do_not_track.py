@@ -1,6 +1,6 @@
 import torch
 from torch.utils.data import DataLoader
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
+from transformers import TrainerCallback, DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
 from datasets import load_dataset
 from transformers import Trainer, TrainingArguments
 import pandas as pd
@@ -8,6 +8,55 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from datasets import Dataset
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+import wandb
+import logging
+
+EPOCHS = 2
+LEARNING_RATE = 2e-5
+BATCH_SIZE = 16
+logging_dir = "./training_metrics_logs"
+
+
+# wandb set up
+wandb.login()
+run = wandb.init(
+# Set the project where this run will be logged
+project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+# Track hyperparameters and run metadata
+config={
+    "learning_rate": LEARNING_RATE,
+    "Batch_size": BATCH_SIZE,
+    "epochs": EPOCHS,
+},
+)
+
+# set up logger
+logging.basicConfig(
+    filename=f"{logging_dir}/do_not_track_test_run.txt",  # Log file location
+    level=logging.INFO,  # Set the logging level
+    format="%(asctime)s - %(message)s",  # Log format
+)
+
+logger = logging.getLogger()
+
+# Custom callback to log metrics
+class LoggingCallback(TrainerCallback):
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        print(f"Metrics received in the callback: {metrics}")
+        if metrics:
+            epoch = state.epoch
+            eval_loss = metrics.get('eval_loss') # YOU CAN ADD    ,None as default here to avoid issues
+            accuracy = metrics.get('eval_accuracy')
+            precision = metrics.get('eval_precision')
+            recall = metrics.get('eval_recall')
+            f1 = metrics.get('eval_f1')
+            log_message = f"Epoch: {epoch}, Eval Loss: {eval_loss}, Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1: {f1}"
+            logger.info(log_message)  # Log metrics to the file
+
+        return control
+
+
+
 
 # Short exploration with pandas
 dataframe = pd.read_csv("Do_Not_Track.csv")
@@ -49,7 +98,7 @@ eval_tokenized_dataset = eval_dataset.map(tokenize_function, batched=True)
 small_train_dataset = train_tokenized_dataset.shuffle(seed=42).select(range(200))  # Small subset for example
 small_eval_dataset = eval_tokenized_dataset.shuffle(seed=42).select(range(100))
 
-model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=10)
+model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=5)
 
 training_args = TrainingArguments(
     output_dir='./results',

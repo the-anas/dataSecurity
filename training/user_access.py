@@ -1,10 +1,61 @@
 from datasets import Dataset
 import pandas as pd
-from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
+from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import accuracy_score, f1_score
+import wandb 
+import logging
+import torch
+
+
+EPOCHS = 2
+LEARNING_RATE = 2e-5
+BATCH_SIZE = 16
+logging_dir = "./training_metrics_logs"
+
+
+# wandb set up
+wandb.login()
+run = wandb.init(
+# Set the project where this run will be logged
+project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+# Track hyperparameters and run metadata
+config={
+    "learning_rate": LEARNING_RATE,
+    "Batch_size": BATCH_SIZE,
+    "epochs": EPOCHS,
+},
+)
+
+# set up logger
+logging.basicConfig(
+    filename=f"{logging_dir}/user_access_test_run.txt",  # Log file location
+    level=logging.INFO,  # Set the logging level
+    format="%(asctime)s - %(message)s",  # Log format
+)
+
+logger = logging.getLogger()
+
+# Custom callback to log metrics
+class LoggingCallback(TrainerCallback):
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        print(f"Metrics received in the callback: {metrics}")
+        if metrics:
+            epoch = state.epoch
+            eval_loss = metrics.get('eval_loss') # YOU CAN ADD    ,None as default here to avoid issues
+            accuracy1 = metrics.get('eval_accuracy_task1')
+            accuracy2 = metrics.get('eval_accuracy_task2')
+            f1_1 = metrics.get('eval_f1_task1')
+            f1_2 = metrics.get('eval_f1_task2')
+            log_message = f"Epoch: {epoch}, Eval Loss: {eval_loss}, Access Type accuracy: {accuracy1}, Access Scope Accuracy: {accuracy2},
+            Access Type F1: {f1_1}, Access Scope F1: {f1_2}"
+            logger.info(log_message)  # Log metrics to the file
+
+        return control
+
+
 
 # Short exploration with pandas
 dataframe = pd.read_csv("User_Access_Edit_and_Deletion.csv")
@@ -29,7 +80,6 @@ eval_df['Access Scope'] = access_scope_encoder.fit_transform(eval_df['Access Sco
 
 
 # Tokenize
-import torch
 
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
@@ -176,15 +226,21 @@ for epoch in range(EPOCHS):  # Number of epochs
             all_labels_task1.extend(labels_task1.cpu().numpy())
             all_labels_task2.extend(labels_task2.cpu().numpy())
 
-        # Compute metrics for each task
-        accuracy_task1 = accuracy_score(all_labels_task1, all_preds_task1)
-        accuracy_task2 = accuracy_score(all_labels_task2, all_preds_task2)
+         # Compute metrics
+        metrics = {
+        'eval_accuracy_task1': accuracy_score(all_labels_task1, all_preds_task1),
+        'eval_f1_task1': f1_score(all_labels_task1, all_preds_task1, average='weighted'),
+        'eval_accuracy_task2': accuracy_score(all_labels_task2, all_preds_task2),
+        'eval_f1_task2': f1_score(all_labels_task2, all_preds_task2, average='weighted')
+        }
 
-        f1_task1 = f1_score(all_labels_task1, all_preds_task1, average='weighted')
-        f1_task2 = f1_score(all_labels_task2, all_preds_task2, average='weighted')
+        print(f"Accuracy Task 1: {metrics['eval_accuracy_task1']:.4f}, F1 Task 1: {metrics['eval_f1_task1']:.4f}")
+        print(f"Accuracy Task 2: {metrics['eval_accuracy_task2']:.4f}, F1 Task 2: {metrics['eval_f1_task2']:.4f}")
 
-        print(f"Accuracy Task 1: {accuracy_task1:.4f}, F1 Task 1: {f1_task1:.4f}")
-        print(f"Accuracy Task 2: {accuracy_task2:.4f}, F1 Task 2: {f1_task2:.4f}")
+
+        # Call the logging callback
+        callback = LoggingCallback()
+        callback.on_evaluate(None, None, None, metrics=metrics)  # Pass the metrics to the callback
 
 # Save model after training and evaluation
 # save model state

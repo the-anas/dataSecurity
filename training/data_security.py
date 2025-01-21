@@ -21,14 +21,14 @@ logging_dir = "./training_metrics_logs"
 # wandb set up
 wandb.login()
 run = wandb.init(
-    # Set the project where this run will be logged
-    project="Annotating Privacy Policies", name= "Test run, not tracking anything",
-    # Track hyperparameters and run metadata
-    config={
-        "learning_rate": LEARNING_RATE,
-        "Batch_size": BATCH_SIZE,
-        "epochs": EPOCHS,
-    },
+# Set the project where this run will be logged
+project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+# Track hyperparameters and run metadata
+config={
+    "learning_rate": LEARNING_RATE,
+    "Batch_size": BATCH_SIZE,
+    "epochs": EPOCHS,
+},
 )
 
 # set up logger

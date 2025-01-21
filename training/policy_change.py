@@ -1,11 +1,64 @@
 # Set up
 from datasets import Dataset
 import pandas as pd
-from transformers import DistilBertForSequenceClassification, DistilBertTokenizer
+from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import accuracy_score, f1_score
+import wandb
+import logging
+
+
+EPOCHS = 2
+LEARNING_RATE = 2e-5
+BATCH_SIZE = 16
+logging_dir = "./training_metrics_logs"
+
+
+# wandb set up
+wandb.login()
+run = wandb.init(
+# Set the project where this run will be logged
+project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+# Track hyperparameters and run metadata
+config={
+    "learning_rate": LEARNING_RATE,
+    "Batch_size": BATCH_SIZE,
+    "epochs": EPOCHS,
+},
+)
+
+# set up logger
+logging.basicConfig(
+    filename=f"{logging_dir}/first_party_test_run.txt",  # Log file location
+    level=logging.INFO,  # Set the logging level
+    format="%(asctime)s - %(message)s",  # Log format
+)
+
+logger = logging.getLogger()
+
+# Custom callback to log metrics
+class LoggingCallback(TrainerCallback):
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        print(f"Metrics received in the callback: {metrics}")
+        if metrics:
+            epoch = state.epoch
+            eval_loss = metrics.get('eval_loss') # YOU CAN ADD    ,None as default here to avoid issues
+            accuracy1 = metrics.get('eval_accuracy_task1')
+            accuracy2 = metrics.get('eval_accuracy_task2')
+            accuracy3 = metrics.get('eval_accuracy_task3')
+            f1_1 = metrics.get('eval_f1_task1')
+            f1_2 = metrics.get('eval_f1_task2')
+            f1_3 = metrics.get('eval_f1_task3')
+            log_message = f"Epoch: {epoch}, Eval Loss: {eval_loss}, Task 1 accuracy: {accuracy1}, Task 2 Accuracy: {accuracy2}, Task 3 accuracy: {accuracy3},
+            Task 1 F1: {f1_1}, Task 2 F1: {f1_2}, Task 3 F1: {f1_3}"
+            logger.info(log_message)  # Log metrics to the file
+
+        return control
+
+
+
 
 # Short exploration with pandas
 dataframe = pd.read_csv("Policy Change.csv")
@@ -206,71 +259,25 @@ for epoch in range(15):  # Number of epochs
             all_labels_task2.extend(labels_task2.cpu().numpy())
             all_labels_task3.extend(labels_task3.cpu().numpy())
 
-        # Compute metrics for each task
-        accuracy_task1 = accuracy_score(all_labels_task1, all_preds_task1)
-        accuracy_task2 = accuracy_score(all_labels_task2, all_preds_task2)
-        accuracy_task3 = accuracy_score(all_labels_task3, all_preds_task3)
+        # Compute metrics
+        metrics = {
+        'eval_accuracy_task1': accuracy_score(all_labels_task1, all_preds_task1),
+        'eval_f1_task1': f1_score(all_labels_task1, all_preds_task1, average='weighted'),
+        'eval_accuracy_task2': accuracy_score(all_labels_task2, all_preds_task2),
+        'eval_f1_task2': f1_score(all_labels_task2, all_preds_task2, average='weighted'),
+        'eval_accuracy_task3': accuracy_score(all_labels_task3, all_preds_task3),
+        'eval_f1_task3': f1_score(all_labels_task3, all_preds_task3, average='weighted')
+        }
 
-        f1_task1 = f1_score(all_labels_task1, all_preds_task1, average='weighted')
-        f1_task2 = f1_score(all_labels_task2, all_preds_task2, average='weighted')
-        f1_task3 = f1_score(all_labels_task3, all_preds_task3, average='weighted')
+        print(f"Accuracy Task 1: {metrics['eval_accuracy_task1']:.4f}, F1 Task 1: {metrics['eval_f1_task1']:.4f}")
+        print(f"Accuracy Task 2: {metrics['eval_accuracy_task2']:.4f}, F1 Task 2: {metrics['eval_f1_task2']:.4f}")
+        print(f"Accuracy Task 3: {metrics['eval_accuracy_task3']:.4f}, F1 Task 3: {metrics['eval_f1_task3']:.4f}")
 
-        print(f"Accuracy Task 1: {accuracy_task1:.4f}, F1 Task 1: {f1_task1:.4f}")
-        print(f"Accuracy Task 2: {accuracy_task2:.4f}, F1 Task 2: {f1_task2:.4f}")
-        print(f"Accuracy Task 3: {accuracy_task3:.4f}, F1 Task 3: {f1_task3:.4f}")
+        # Call the logging callback
+        callback = LoggingCallback()
+        callback.on_evaluate(None, None, None, metrics=metrics)  # Pass the metrics to the callback
 
-from sklearn.metrics import accuracy_score, f1_score
 
-# Evaluation loop
-model.eval()
-with torch.no_grad():
-    all_preds_task1 = []
-    all_preds_task2 = []
-    all_preds_task3 = []
-    all_labels_task1 = []
-    all_labels_task2 = []
-    all_labels_task3 = []
-
-    for batch in eval_dataloader:
-        # Unpack the batch directly (since it's a list of tensors, not a dictionary)
-        input_ids, attention_mask, labels_task1, labels_task2, labels_task3 = batch
-
-        # Move tensors to the device
-        input_ids = input_ids.to(device)
-        attention_mask = attention_mask.to(device)
-        labels_task1 = labels_task1.to(device)
-        labels_task2 = labels_task2.to(device)
-        labels_task3 = labels_task3.to(device)
-
-        # Forward pass
-        logits_task1, logits_task2, logits_task3 = model(input_ids=input_ids, attention_mask=attention_mask)
-
-        # Get predictions by taking the class with the highest logit value
-        preds_task1 = logits_task1.argmax(dim=-1)
-        preds_task2 = logits_task2.argmax(dim=-1)
-        preds_task3 = logits_task3.argmax(dim=-1)
-
-        # Collect predictions and true labels for metrics computation
-        all_preds_task1.extend(preds_task1.cpu().numpy())
-        all_preds_task2.extend(preds_task2.cpu().numpy())
-        all_preds_task3.extend(preds_task3.cpu().numpy())
-
-        all_labels_task1.extend(labels_task1.cpu().numpy())
-        all_labels_task2.extend(labels_task2.cpu().numpy())
-        all_labels_task3.extend(labels_task3.cpu().numpy())
-
-    # Compute metrics for each task
-    accuracy_task1 = accuracy_score(all_labels_task1, all_preds_task1)
-    accuracy_task2 = accuracy_score(all_labels_task2, all_preds_task2)
-    accuracy_task3 = accuracy_score(all_labels_task3, all_preds_task3)
-
-    f1_task1 = f1_score(all_labels_task1, all_preds_task1, average='weighted')
-    f1_task2 = f1_score(all_labels_task2, all_preds_task2, average='weighted')
-    f1_task3 = f1_score(all_labels_task3, all_preds_task3, average='weighted')
-
-    print(f"Accuracy Task 1: {accuracy_task1:.4f}, F1 Task 1: {f1_task1:.4f}")
-    print(f"Accuracy Task 2: {accuracy_task2:.4f}, F1 Task 2: {f1_task2:.4f}")
-    print(f"Accuracy Task 3: {accuracy_task3:.4f}, F1 Task 3: {f1_task3:.4f}")
 
 # Save model after training and evaluation
 # save model state
