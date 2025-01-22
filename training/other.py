@@ -10,24 +10,35 @@ from datasets import Dataset
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import wandb
 import logging
+import os
 
-
-EPOCHS = 2
-LEARNING_RATE = 2e-5
-BATCH_SIZE = 16
+EPOCHS = 25
+LEARNING_RATE = 5e-5   
+BATCH_SIZE = 8
+WEIGHT_DECAY = 0.01
 logging_dir = "./training_metrics_logs"
 
 # wandb set up
+os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB logs
 wandb.login()
 run = wandb.init(
     # Set the project where this run will be logged
-    project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+    project="Annotating Privacy Policies", name= "Other model: expoloring why model won't generalize, 7 epochs",
     # Track hyperparameters and run metadata
     config={
         "learning_rate": LEARNING_RATE,
         "Batch_size": BATCH_SIZE,
         "epochs": EPOCHS,
     },
+#    notes = "Lowered learning rate and batch size, increased epochs, and increased weight decay"
+)
+
+# set up logger
+logging.basicConfig(
+    filename=f"{logging_dir}/other_test_run2.txt",  # Log file location
+    level=logging.INFO,  # Set the logging level
+    format="%(asctime)s - %(message)s",  # Log format
+    filemode='w'
 )
 
 logger = logging.getLogger()
@@ -52,10 +63,8 @@ class LoggingCallback(TrainerCallback):
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("Other.csv")
+dataframe = pd.read_csv("processed_data/Other.csv")
 
-# About data
-print(len(dataframe["Other Type"].unique())) # --> 10  possible unique values
 
 #rename column for huggingface API
 dataframe.rename(columns={'Other Type': 'labels'}, inplace=True)
@@ -93,15 +102,25 @@ eval_tokenized_dataset = eval_dataset.map(tokenize_function, batched=True)
 
 model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=4)
 
+
+
 training_args = TrainingArguments(
-    output_dir='./results',
-    evaluation_strategy="epoch",
-    learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=3,
-    weight_decay=0.01,
+    output_dir='/mnt/data/other_results',  # Directory where models and logs will be saved
+    evaluation_strategy="epoch",  # Perform evaluation at the end of each epoch
+    save_strategy="epoch",        # Save checkpoints at the end of each epoch
+    save_total_limit=1,           # Keep only the best checkpoint (based on accuracy)
+    load_best_model_at_end=True,  # Load the best model when training is complete
+    metric_for_best_model="eval_accuracy",  # Use accuracy to determine the best model
+    greater_is_better=True,      # Higher accuracy means better model
+    learning_rate=LEARNING_RATE,
+    per_device_train_batch_size=BATCH_SIZE,
+    per_device_eval_batch_size=BATCH_SIZE,
+    num_train_epochs=EPOCHS,
+    weight_decay= WEIGHT_DECAY,
+    logging_steps=100,
+    report_to="wandb",            # Log metrics to W&B
 )
+
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -124,20 +143,20 @@ def compute_metrics(eval_pred):
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=train_tokenized_dataset, # MAKE SURE YOU ARE USING CORRECT DATASET
-    eval_dataset=eval_tokenized_dataset,  # MAKE SURE YOU ARE USING CORRECT DATASET
+    train_dataset=train_tokenized_dataset, 
+    eval_dataset=eval_tokenized_dataset,  
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
+    callbacks = [LoggingCallback]
 )
 
 # Train the model
 trainer.train()
 
-# Evaluate the model
 
 eval_results = trainer.evaluate()
 print(eval_results)
 
 # Save the model
-model.save_pretrained("./other_model")
-tokenizer.save_pretrained("./other_model")
+model.save_pretrained("/mnt/data/other_model")
+tokenizer.save_pretrained("/mnt/data/other_model")
