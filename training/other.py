@@ -15,7 +15,7 @@ import ast
 from sklearn.metrics import accuracy_score, f1_score, hamming_loss
 import numpy as np
 
-EPOCHS = 25
+EPOCHS = 5
 LEARNING_RATE = 5e-5   
 BATCH_SIZE = 8
 WEIGHT_DECAY = 0.01
@@ -26,7 +26,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
     # Set the project where this run will be logged
-    project="Annotating Privacy Policies", name= "Other model: expoloring why model won't generalize, 7 epochs",
+    project="Annotating Privacy Policies", name= "Other model: testing multilabel classification",
     # Track hyperparameters and run metadata
     config={
         "learning_rate": LEARNING_RATE,
@@ -38,7 +38,7 @@ run = wandb.init(
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/other_test_run2.txt",  # Log file location
+    filename=f"{logging_dir}/other_test_run.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
     filemode='w'
@@ -53,11 +53,13 @@ class LoggingCallback(TrainerCallback):
         if metrics:
             epoch = state.epoch
             eval_loss = metrics.get('eval_loss') # YOU CAN ADD    ,None as default here to avoid issues
-            accuracy = metrics.get('eval_accuracy')
-            precision = metrics.get('eval_precision')
-            recall = metrics.get('eval_recall')
-            f1 = metrics.get('eval_f1')
-            log_message = f"Epoch: {epoch}, Eval Loss: {eval_loss}, Accuracy: {accuracy}, Precision: {precision}, Recall: {recall}, F1: {f1}"
+            exact_match = metrics.get('eval_exact_match')
+            multilabel_accuracy = metrics.get('eval_multilabel_accuracy')
+            f1_macro = metrics.get('eval_f1_macro')
+            f1_micro = metrics.get('eval_f1_micor')
+            hamming_loss = metrics.get('eval_hamming_loss')
+
+            log_message = f"Epoch: {epoch}, Eval Loss: {eval_loss}, Exact Match: {exact_match}, Multilabel Accuracy: {multilabel_accuracy}, F1 Macro: {f1_macro}, F1 Micro: {f1_micro}, Hamming Loss: {hamming_loss}"
             logger.info(log_message)  # Log metrics to the file
 
         return control
@@ -69,7 +71,7 @@ class LoggingCallback(TrainerCallback):
 dataframe = pd.read_csv("updated_multilabel_data/Other2.csv")
 
 # further edits to data
-dataframe.rename(columns={'Other Type': 'labels'}, inplace=True) # rename col for huggingface api
+dataframe.rename(columns={'Other Type': 'label'}, inplace=True) # rename col for huggingface api
 dataframe['label'] = dataframe['label'].apply(ast.literal_eval) # convert string to list
 dataframe['label'] = dataframe['label'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
 
