@@ -1,8 +1,9 @@
 /papers
 /.ipynb_checkpoints
 /__pycache__
-*.csv
+#*.csv
 *.pkl
 *.log
 *.txt
 /data_security
+/processed_data
