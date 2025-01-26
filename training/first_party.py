@@ -4,10 +4,13 @@ from transformers import TrainerCallback, DistilBertForSequenceClassification, D
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.metrics import accuracy_score, f1_score, hamming_loss
 import wandb
 import logging
-
+import torch 
+import numpy as np
+import ast
+import os
 
 EPOCHS = 2
 LEARNING_RATE = 2e-5
@@ -15,7 +18,8 @@ BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
 
 
-# wandb set up
+# wandb set 
+os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB logs
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
@@ -33,68 +37,63 @@ logging.basicConfig(
     filename=f"{logging_dir}/first_party_test_run.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
+    filemode='w'  # Clear the log file on each run
 )
 
 logger = logging.getLogger()
 
 # Custom callback to log metrics
 class LoggingCallback(TrainerCallback):
-    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
-        print(f"Metrics received in the callback: {metrics}")
-        if metrics:
-            epoch = state.epoch
-            eval_loss = metrics.get('eval_loss') # YOU CAN ADD    ,None as default here to avoid issues
-            accuracy1 = metrics.get('eval_accuracy_task1')
-            accuracy2 = metrics.get('eval_accuracy_task2')
-            accuracy3 = metrics.get('eval_accuracy_task3')
-            f1_1 = metrics.get('eval_f1_task1')
-            f1_2 = metrics.get('eval_f1_task2')
-            f1_3 = metrics.get('eval_f1_task3')
-            log_message = f"Epoch: {epoch}, Eval Loss: {eval_loss}, Task 1 accuracy: {accuracy1}, Task 2 Accuracy: {accuracy2}, Task 3 accuracy: {accuracy3},
-            Task 1 F1: {f1_1}, Task 2 F1: {f1_2}, Task 3 F1: {f1_3}"
-            logger.info(log_message)  # Log metrics to the file
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
 
-        return control
+    def on_evaluate(self, epoch, metrics):
+        """
+        Logs the evaluation metrics after each epoch.
+
+        Args:
+            model: The model being evaluated (optional, not used in this logger).
+            eval_dataloader: The evaluation data loader (optional, not used in this logger).
+            epoch: The current epoch number.
+            metrics: A dictionary containing the evaluation metrics.
+        """
+        self.logger.info(f"--- Evaluation Metrics for Epoch {epoch} ---")
+        print(f"metrics: {metrics}")
+        for task, task_metrics in metrics.items():
+            print(f"task: {task}")
+            print(f"task metrics: {task_metrics}")
+            self.logger.info(f"Task: {task}")
+            for metric_name, metric_value in task_metrics.items():
+                self.logger.info(f"    {metric_name}: {metric_value:.4f}")
+        self.logger.info("----------------------------------------")
+
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("First_Party_Collection_or_Use.csv")
-
-# About data
-print(dataframe["Collection Mode"].unique()) # --> 4 unique possbile values
-print(len(dataframe["Personal Information Type"].unique())) # --> 16  possible unique values
-print(len(dataframe["Purpose"].unique())) # --> 11 unique possible values
-
-dataframe.head()
+dataframe = pd.read_csv("updated_multilabel_data/First_Party2.csv")
 
 # Preprocessing
+dataframe['Personal Information Type'] = dataframe['Personal Information Type'].apply(ast.literal_eval) # convert string to list
+dataframe['Personal Information Type'] = dataframe['Personal Information Type'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
+
+dataframe['Collection Mode'] = dataframe['Collection Mode'].apply(ast.literal_eval) # convert string to list
+dataframe['Collection Mode'] = dataframe['Collection Mode'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
+
+dataframe['Purpose'] = dataframe['Purpose'].apply(ast.literal_eval) # convert string to list
+dataframe['Purpose'] = dataframe['Purpose'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
+
+
 # split data
 train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
 
 # Encode labels
 
-# Initialize a label encoder for each target column
-collection_mode_encoder = LabelEncoder()
-personal_info_type_encoder = LabelEncoder()
-purpose_encoder = LabelEncoder()
-
-# encode training dataset
-train_df['Collection Mode'] = collection_mode_encoder.fit_transform(train_df['Collection Mode'])
-train_df['Personal Information Type'] = personal_info_type_encoder.fit_transform(train_df['Personal Information Type'])
-train_df['Purpose'] = purpose_encoder.fit_transform(train_df['Purpose'])
-
-# Encode eval dataset
-eval_df['Collection Mode'] = collection_mode_encoder.fit_transform(eval_df['Collection Mode'])
-eval_df['Personal Information Type'] = personal_info_type_encoder.fit_transform(eval_df['Personal Information Type'])
-eval_df['Purpose'] = purpose_encoder.fit_transform(eval_df['Purpose'])
 
 # # transform to huggingface dataset
 # train_dataset = Dataset.from_pandas(train_df)
 # eval_dataset = Dataset.from_pandas(eval_df)
 
 # Tokenize
-import torch
-
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 
 # Tokenize the texts in the DataFrame
@@ -102,13 +101,13 @@ inputs = tokenizer(list(train_df['segment']), padding=True, truncation=True, max
 inputs_eval = tokenizer(list(eval_df['segment']), padding=True, truncation=True, max_length=512, return_tensors="pt")
 
 # Convert labels to tensors
-collection_mode_labels = torch.tensor(train_df['Collection Mode'].values)
-personal_information_labels = torch.tensor(train_df['Personal Information Type'].values)
-purpose_labels = torch.tensor(train_df['Purpose'].values)
+collection_mode_labels = torch.tensor(np.array(train_df['Collection Mode'].tolist(), dtype=np.float32))
+personal_information_labels = torch.tensor(np.array(train_df['Personal Information Type'].tolist(), dtype=np.float32))
+purpose_labels = torch.tensor(np.array(train_df['Purpose'].tolist(), dtype=np.float32))
 
-collection_mode_labels_eval = torch.tensor(eval_df['Collection Mode'].values)
-personal_information_labels_eval = torch.tensor(eval_df['Personal Information Type'].values)
-purpose_labels_eval = torch.tensor(eval_df['Purpose'].values)
+collection_mode_labels_eval = torch.tensor(np.array(eval_df['Collection Mode'].tolist(), dtype=np.float32))
+personal_information_labels_eval = torch.tensor(np.array(eval_df['Personal Information Type'].tolist(), dtype=np.float32))
+purpose_labels_eval = torch.tensor(np.array(eval_df['Purpose'].tolist(), dtype=np.float32))
 
 # Create a TensorDataset
 train_dataset = TensorDataset(inputs['input_ids'], inputs['attention_mask'], collection_mode_labels, personal_information_labels, purpose_labels)
@@ -132,25 +131,36 @@ eval_subset_dataloader = DataLoader(eval_subset, batch_size=16, shuffle=True)
 from transformers import DistilBertModel, PreTrainedModel, DistilBertConfig
 import torch.nn as nn
 
-class DistilBertForMultiTask(PreTrainedModel):
-    def __init__(self, config, num_labels_task1, num_labels_task2, num_labels_task3):
-        super().__init__(config)
-        self.distilbert = DistilBertModel(config)
+class DistilBertMultiLabel(nn.Module):
+    def __init__(self, num_labels_task1, num_labels_task2, num_labels_task3):
+        super(DistilBertMultiLabel, self).__init__()
+        self.distilbert = DistilBertModel.from_pretrained("distilbert-base-uncased")
 
-        # Output heads for each task
-        self.classifier_task1 = nn.Linear(config.dim, num_labels_task1)
-        self.classifier_task2 = nn.Linear(config.dim, num_labels_task2)
-        self.classifier_task3 = nn.Linear(config.dim, num_labels_task3)
+        # Multi-label classification heads
+        self.classifier_task1 = nn.Linear(self.distilbert.config.hidden_size, num_labels_task1)
+        self.classifier_task2 = nn.Linear(self.distilbert.config.hidden_size, num_labels_task2)
+        self.classifier_task3 = nn.Linear(self.distilbert.config.hidden_size, num_labels_task3)
+        
+    def forward(self, input_ids, attention_mask):
+        # Get the hidden states from DistilBERT
+        outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_mask)
+        hidden_state = outputs.last_hidden_state  # Shape: (batch_size, seq_len, hidden_size)
 
-    def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None, labels_task3=None):
-        outputs = self.distilbert(input_ids, attention_mask=attention_mask)
-        pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
+        # Use the [CLS] token (first token in sequence) for classification
+        cls_token_embedding = hidden_state[:, 0, :]  # Shape: (batch_size, hidden_size)
 
-        logits_task1 = self.classifier_task1(pooled_output)
-        logits_task2 = self.classifier_task2(pooled_output)
-        logits_task3 = self.classifier_task3(pooled_output)
+        # Compute logits for each task
+        logits_task1 = self.classifier_task1(cls_token_embedding)
+        logits_task2 = self.classifier_task2(cls_token_embedding)
+        logits_task3 = self.classifier_task3(cls_token_embedding)
 
-        return logits_task1, logits_task2, logits_task3
+        # Apply sigmoid for multi-label probabilities
+        probs_task1 = torch.sigmoid(logits_task1)
+        probs_task2 = torch.sigmoid(logits_task2)
+        probs_task3 = torch.sigmoid(logits_task3)
+
+        return probs_task1, probs_task2, probs_task3    
+
 
 
 
@@ -158,8 +168,9 @@ class DistilBertForMultiTask(PreTrainedModel):
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
 
 # Now initialize the model with the configuration and number of labels for each task
-model = DistilBertForMultiTask(config, num_labels_task1=4, num_labels_task2=16, num_labels_task3=11)
+model = DistilBertMultiLabel(config, num_labels_task1=4, num_labels_task2=16, num_labels_task3=11)
 
+# DistilBertForMultiTask
 from transformers import AdamW
 import torch
 
@@ -167,9 +178,9 @@ import torch
 optimizer = AdamW(model.parameters(), lr=5e-5)
 
 # Loss functions for each task
-loss_fn_task1 = torch.nn.CrossEntropyLoss()
-loss_fn_task2 = torch.nn.CrossEntropyLoss()
-loss_fn_task3 = torch.nn.CrossEntropyLoss()
+loss_fn_task1 = nn.BCEWithLogitsLoss()
+loss_fn_task2 = nn.BCEWithLogitsLoss()
+loss_fn_task3 = nn.BCEWithLogitsLoss()
 
 
 # Training loop with logs
@@ -245,9 +256,9 @@ for epoch in range(15):  # Number of epochs
             logits_task1, logits_task2, logits_task3 = model(input_ids=input_ids, attention_mask=attention_mask)
 
             # Get predictions by taking the class with the highest logit value
-            preds_task1 = logits_task1.argmax(dim=-1)
-            preds_task2 = logits_task2.argmax(dim=-1)
-            preds_task3 = logits_task3.argmax(dim=-1)
+            preds_task1 = (logits_task1 > 0.5).int()
+            preds_task2 = (logits_task2 > 0.5).int()
+            preds_task3 = (logits_task3 > 0.5).int()
 
             # Collect predictions and true labels for metrics computation
             all_preds_task1.extend(preds_task1.cpu().numpy())
@@ -259,23 +270,34 @@ for epoch in range(15):  # Number of epochs
             all_labels_task3.extend(labels_task3.cpu().numpy())
 
         # Compute metrics
-        metrics = {
-        'eval_accuracy_task1': accuracy_score(all_labels_task1, all_preds_task1),
-        'eval_f1_task1': f1_score(all_labels_task1, all_preds_task1, average='weighted'),
-        'eval_accuracy_task2': accuracy_score(all_labels_task2, all_preds_task2),
-        'eval_f1_task2': f1_score(all_labels_task2, all_preds_task2, average='weighted'),
-        'eval_accuracy_task3': accuracy_score(all_labels_task3, all_preds_task3),
-        'eval_f1_task3': f1_score(all_labels_task3, all_preds_task3, average='weighted')
+        metrics ={
+        'Task 1' : {
+            'exact_match': np.mean(np.all(np.array(all_labels_task1) == np.array(all_preds_task1), axis=1)),
+            'multilabel_accuracy': np.mean(( np.array(all_labels_task1) == np.array(all_preds_task1)).mean(axis=0)),
+            'f1_macro': f1_score(all_labels_task1, all_preds_task1, average="macro"),
+            'f1_micro': f1_score(all_labels_task1, all_preds_task1, average="micro"),
+            'hamming_loss': hamming_loss(all_labels_task1, all_preds_task1),
+            },
+        'Task 2' : {
+            'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
+            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
+            'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
+            'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
+            'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
+            }, 
+        'Task 3' : {
+            'exact_match':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=1)),
+            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=0)),
+            'f1_macro': f1_score(all_labels_task3, all_preds_task3, average="macro"),
+            'f1_micro': f1_score(all_labels_task3, all_preds_task3, average="micro"),
+            'hamming_loss': hamming_loss(all_labels_task3, all_preds_task3),
+            }
+        
         }
-
-        print(f"Accuracy Task 1: {metrics['eval_accuracy_task1']:.4f}, F1 Task 1: {metrics['eval_f1_task1']:.4f}")
-        print(f"Accuracy Task 2: {metrics['eval_accuracy_task2']:.4f}, F1 Task 2: {metrics['eval_f1_task2']:.4f}")
-        print(f"Accuracy Task 3: {metrics['eval_accuracy_task3']:.4f}, F1 Task 3: {metrics['eval_f1_task3']:.4f}")
 
         # Call the logging callback
         callback = LoggingCallback()
-        callback.on_evaluate(None, None, None, metrics=metrics)  # Pass the metrics to the callback
-
+        callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 # Save model after training and evaluation
 # save model state
@@ -283,9 +305,3 @@ torch.save(model.state_dict(), 'first_party_model_state_dict.pth')
 
 # save entire  model
 torch.save(model, 'first_party_model_full.pth')
-
-# Decoding predictions
-predicted_labels_task1 = collection_mode_encoder.inverse_transform(predictions_task1)
-predicted_labels_task2 = personal_info_type_encoder.inverse_transform(predictions_task2)
-predicted_labels_task3 = purpose_encoder.inverse_transform(predictions_task3)
-

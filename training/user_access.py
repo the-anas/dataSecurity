@@ -13,6 +13,8 @@ import torch.nn as nn
 from transformers import AdamW
 import numpy as np
 import ast
+import os
+
 
 EPOCHS = 3
 LEARNING_RATE = 2e-5
@@ -22,6 +24,7 @@ logging_dir = "./training_metrics_logs"
 
 
 # wandb set up
+os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB logs
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
@@ -78,6 +81,7 @@ dataframe['Access Type'] = dataframe['Access Type'].apply(lambda x: [float(i) fo
 
 dataframe['Access Scope'] = dataframe['Access Scope'].apply(ast.literal_eval) # convert string to list
 dataframe['Access Scope'] = dataframe['Access Scope'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
+
 
 # Preprocessing
 # split data
@@ -139,9 +143,6 @@ config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
 
 # Now initialize the model with the configuration and number of labels for each task
 model = DistilBertForMultiTask(config, num_labels_task1=7, num_labels_task2=6)
-
-
-
 
 # Initialize the optimizer
 optimizer = AdamW(model.parameters(), lr=5e-5)
