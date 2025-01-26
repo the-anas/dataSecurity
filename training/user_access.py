@@ -11,10 +11,10 @@ import torch
 from transformers import DistilBertModel, PreTrainedModel, DistilBertConfig
 import torch.nn as nn
 from transformers import AdamW
-import torch
 import numpy as np
+import ast
 
-EPOCHS = 2
+EPOCHS = 3
 LEARNING_RATE = 2e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -48,7 +48,7 @@ class LoggingCallback:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
-    def on_evaluate(self, model, eval_dataloader, epoch, metrics):
+    def on_evaluate(self, epoch, metrics):
         """
         Logs the evaluation metrics after each epoch.
 
@@ -58,8 +58,11 @@ class LoggingCallback:
             epoch: The current epoch number.
             metrics: A dictionary containing the evaluation metrics.
         """
-        self.logger.info(f"--- Evaluation Metrics for Epoch {epoch+1} ---")
+        self.logger.info(f"--- Evaluation Metrics for Epoch {epoch} ---")
+        print(f"metrics: {metrics}")
         for task, task_metrics in metrics.items():
+            print(f"task: {task}")
+            print(f"task metrics: {task_metrics}")
             self.logger.info(f"Task: {task}")
             for metric_name, metric_value in task_metrics.items():
                 self.logger.info(f"    {metric_name}: {metric_value:.4f}")
@@ -67,7 +70,14 @@ class LoggingCallback:
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("User_Access_Edit_and_Deletion.csv")
+dataframe = pd.read_csv("updated_multilabel_data/User_Access2.csv")
+
+
+dataframe['Access Type'] = dataframe['Access Type'].apply(ast.literal_eval) # convert string to list
+dataframe['Access Type'] = dataframe['Access Type'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
+
+dataframe['Access Scope'] = dataframe['Access Scope'].apply(ast.literal_eval) # convert string to list
+dataframe['Access Scope'] = dataframe['Access Scope'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
 
 # Preprocessing
 # split data
@@ -82,12 +92,12 @@ tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 inputs = tokenizer(list(train_df['segment']), padding=True, truncation=True, max_length=512, return_tensors="pt")
 inputs_eval = tokenizer(list(eval_df['segment']), padding=True, truncation=True, max_length=512, return_tensors="pt")
 
-# Convert labels to tensors
-access_type_labels = torch.tensor(train_df['Access Type'].values)
-access_scope_labels = torch.tensor(train_df['Access Scope'].values)
+# Convert labels to proper numpy array and then to tensors
+access_type_labels = torch.tensor(np.array(train_df['Access Type'].tolist(), dtype=np.float32))
+access_scope_labels = torch.tensor(np.array(train_df['Access Scope'].tolist(), dtype=np.float32))
 
-access_type_labels_eval = torch.tensor(eval_df['Access Type'].values)
-access_scope_labels_eval = torch.tensor(eval_df['Access Scope'].values)
+access_type_labels_eval = torch.tensor(np.array(eval_df['Access Type'].tolist(), dtype=np.float32))
+access_scope_labels_eval = torch.tensor(np.array(eval_df['Access Scope'].tolist(), dtype=np.float32))
 
 # Create a TensorDataset
 train_dataset = TensorDataset(inputs['input_ids'], inputs['attention_mask'], access_type_labels, access_scope_labels)
@@ -128,7 +138,7 @@ class DistilBertForMultiTask(PreTrainedModel):
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
 
 # Now initialize the model with the configuration and number of labels for each task
-model = DistilBertForMultiTask(config, num_labels_task1=9, num_labels_task2=6)
+model = DistilBertForMultiTask(config, num_labels_task1=7, num_labels_task2=6)
 
 
 
@@ -207,28 +217,26 @@ for epoch in range(EPOCHS):
             all_labels_task2.extend(labels_task2.cpu().numpy())
 
          # Compute metrics for both tasks
-        metrics_task1 = {
-            'exact_match': np.mean(np.all(all_labels_task1 == all_preds_task1, axis=1)),
-            'multilabel_accuracy': np.mean((all_labels_task1 == all_preds_task1).mean(axis=0)),
+        metrics ={
+        'Access Type' : {
+            'exact_match': np.mean(np.all(np.array(all_labels_task1) == np.array(all_preds_task1), axis=1)),
+            'multilabel_accuracy': np.mean(( np.array(all_labels_task1) == np.array(all_preds_task1)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task1, all_preds_task1, average="macro"),
             'f1_micro': f1_score(all_labels_task1, all_preds_task1, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task1, all_preds_task1),
-        }
-        metrics_task2 = {
-            'exact_match':  np.mean(np.all(all_labels_task2, all_preds_task2, axis=1)),
-            'multilabel_accuracy':  np.mean(np.all(all_labels_task2, all_preds_task2, axis=0)),
+            },
+        'Access Scope' : {
+            'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
+            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
             'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
             'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
+            }
         }
-
-        print(f"Task 1 Metrics: {metrics_task1}")
-        print(f"Task 2 Metrics: {metrics_task2}")
-
 
         # Call the logging callback
         callback = LoggingCallback()
-        callback.on_evaluate(None, None, None, metrics={**metrics_task1, **metrics_task2})
+        callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 
 

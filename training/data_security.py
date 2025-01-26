@@ -15,9 +15,9 @@ import ast
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score, hamming_loss
 
-EPOCHS = 2
+EPOCHS = 4
 LEARNING_RATE = 2e-5
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 logging_dir = "./training_metrics_logs"
 WEIGHT_DECAY = 0.01
 
@@ -70,7 +70,7 @@ class LoggingCallback(TrainerCallback):
 dataframe = pd.read_csv("./updated_multilabel_data/Data_Security2.csv")
 
 #rename column for huggingface API
-dataframe.rename(columns={'Security Measure': 'labels'}, inplace=True)
+dataframe.rename(columns={'Security Measure': 'label'}, inplace=True)
 dataframe['label'] = dataframe['label'].apply(ast.literal_eval) # convert string to list
 dataframe['label'] = dataframe['label'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
 

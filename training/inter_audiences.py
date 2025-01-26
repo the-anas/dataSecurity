@@ -94,9 +94,9 @@ def tokenize_function(examples):
 train_tokenized_dataset = train_dataset.map(tokenize_function, batched=True)
 eval_tokenized_dataset = eval_dataset.map(tokenize_function, batched=True)
 
-# Prepare DataLoader
-small_train_dataset = train_tokenized_dataset.shuffle(seed=42).select(range(200))  # Small subset for example
-small_eval_dataset = eval_tokenized_dataset.shuffle(seed=42).select(range(100))
+# # Prepare DataLoader
+# small_train_dataset = train_tokenized_dataset.shuffle(seed=42).select(range(200))  # Small subset for example
+# small_eval_dataset = eval_tokenized_dataset.shuffle(seed=42).select(range(100))
 
 model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=5)
 
