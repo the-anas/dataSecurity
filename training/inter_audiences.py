@@ -1,4 +1,3 @@
-import torch
 from torch.utils.data import DataLoader
 from transformers import TrainerCallback, DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
 from datasets import load_dataset
@@ -11,6 +10,7 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import wandb
 import logging
 
+# single classification at this script
 
 EPOCHS = 2
 LEARNING_RATE = 2e-5
@@ -36,6 +36,7 @@ logging.basicConfig(
     filename=f"{logging_dir}/inter_audiences_test_run.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
+    filemode='w'
 )
 
 logger = logging.getLogger()
@@ -61,10 +62,7 @@ class LoggingCallback(TrainerCallback):
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("International_and_specific_audiences.csv")
-
-# About data
-print(len(dataframe["Audience Type"].unique())) # --> 10  possible unique values
+dataframe = pd.read_csv("updated_multilabel_data/Inter_Aud2.csv")
 
 #rename column for huggingface API
 dataframe.rename(columns={'Audience Type': 'labels'}, inplace=True)
@@ -136,7 +134,8 @@ trainer = Trainer(
     train_dataset=train_tokenized_dataset, # MAKE SURE YOU ARE USING CORRECT DATASET
     eval_dataset=eval_tokenized_dataset,  # MAKE SURE YOU ARE USING CORRECT DATASET
     tokenizer=tokenizer,
-    compute_metrics=compute_metrics
+    compute_metrics=compute_metrics,
+    callbacks = [LoggingCallback]
 )
 
 # Train the model
@@ -148,5 +147,5 @@ eval_results = trainer.evaluate()
 print(eval_results)
 
 # Save the model
-model.save_pretrained("./inter_audiences_model")
-tokenizer.save_pretrained("./inter_audiences_model")
+model.save_pretrained("/mnt/data/inter_audiences_model")
+tokenizer.save_pretrained("/mnt/data/inter_audiences_model")

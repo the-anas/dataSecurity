@@ -1,4 +1,3 @@
-import torch
 from torch.utils.data import DataLoader
 from transformers import TrainerCallback, DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
 from datasets import load_dataset
@@ -75,7 +74,7 @@ dataframe.rename(columns={'Other Type': 'label'}, inplace=True) # rename col for
 dataframe['label'] = dataframe['label'].apply(ast.literal_eval) # convert string to list
 dataframe['label'] = dataframe['label'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
 
-# Encode labels and split data
+# split data
 train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
 
 # transform to huggingface dataset
