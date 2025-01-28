@@ -1,5 +1,4 @@
 # Set up
-from datasets import Dataset
 import pandas as pd
 from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
 from sklearn.preprocessing import LabelEncoder
@@ -38,7 +37,7 @@ config={
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/first_party_test_run.txt",  # Log file location
+    filename=f"{logging_dir}/data_retention_test_run.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
     filemode='w'
@@ -90,9 +89,6 @@ dataframe['Retention Purpose'] = dataframe['Retention Purpose'].apply(lambda x: 
 # split data
 train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
 
-# # transform to huggingface dataset
-# train_dataset = Dataset.from_pandas(train_df)
-# eval_dataset = Dataset.from_pandas(eval_df)
 
 # Tokenize
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
@@ -115,21 +111,11 @@ train_dataset = TensorDataset(inputs['input_ids'], inputs['attention_mask'], ret
 eval_dataset = TensorDataset(inputs_eval['input_ids'], inputs_eval['attention_mask'], retention_period_labels_eval, personal_information_labels_eval, purpose_labels_eval)
 
 
-
 # Create a DataLoader
-train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True) # YOU CAN EDIT THIS ARGUMENT LATER AS YOU WANT
+train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True) 
 eval_dataloader = DataLoader(eval_dataset, batch_size=16, shuffle = True )
 
-
-# take a small subset of data for testing
-train_subset = torch.utils.data.Subset(train_dataset, range(80))
-eval_subset = torch.utils.data.Subset(eval_dataset, range(20))
-
-train_subset_dataloader = DataLoader(train_subset, batch_size=16, shuffle=True)
-eval_subset_dataloader = DataLoader(eval_subset, batch_size=16, shuffle=True)
-
 # Adjust model for multitask case
-
 
 class DistilBertMultiLabel(nn.Module):
     def __init__(self, num_labels_task1, num_labels_task2, num_labels_task3):
@@ -165,7 +151,7 @@ class DistilBertMultiLabel(nn.Module):
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
 
 # Now initialize the model with the configuration and number of labels for each task
-model = DistilBertMultiLabel(config, num_labels_task1=4, num_labels_task2=16, num_labels_task3=11)
+model = DistilBertMultiLabel(num_labels_task1=5, num_labels_task2=16, num_labels_task3=8)
 
 from transformers import AdamW
 import torch
@@ -184,7 +170,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 model.to(device)
 print(f"Training on device: {device}")
 
-for epoch in range(15):  # Number of epochs
+for epoch in range(EPOCHS):  # Number of epochs
     model.train()
     total_loss_epoch = 0  # To accumulate the loss for the epoch
     for batch_idx, batch in enumerate(train_dataloader):
@@ -218,15 +204,15 @@ for epoch in range(15):  # Number of epochs
 
         # Log progress every 10 batches
         if batch_idx % 100 == 0:
-            print(f"Epoch {epoch+1}/{15}, Batch {batch_idx}/{len(train_dataloader)}, Loss: {total_loss.item():.4f}")
+            print(f"Epoch {epoch+1}/{EPOCHS}, Batch {batch_idx}/{len(train_dataloader)}, Loss: {total_loss.item():.4f}")
 
     # Average loss for the epoch
     avg_loss_epoch = total_loss_epoch / len(train_dataloader)
     print(f"Epoch {epoch+1} completed. Average Loss for this epoch: {avg_loss_epoch:.4f}")
 
-      # Evaluation code
 
 
+    # Evaluation code
     model.eval()
     with torch.no_grad():
         all_preds_task1 = []
@@ -236,7 +222,7 @@ for epoch in range(15):  # Number of epochs
         all_labels_task2 = []
         all_labels_task3 = []
 
-        for batch in eval_subset_dataloader:
+        for batch in eval_dataloader:
             # Unpack the batch directly (since it's a list of tensors, not a dictionary)
             input_ids, attention_mask, labels_task1, labels_task2, labels_task3 = batch
 
@@ -287,7 +273,6 @@ for epoch in range(15):  # Number of epochs
             'f1_micro': f1_score(all_labels_task3, all_preds_task3, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task3, all_preds_task3),
             }
-        
         }
 
         # Call the logging callback
@@ -297,7 +282,7 @@ for epoch in range(15):  # Number of epochs
 
 # Save model after training and evaluation
 # save model state
-torch.save(model.state_dict(), 'first_party_model_state_dict.pth')
+torch.save(model.state_dict(), 'data_retention_model_state_dict.pth')
 
 # save entire  model
-torch.save(model, 'first_party_model_full.pth')
+torch.save(model, 'data_retention_model_full.pth')

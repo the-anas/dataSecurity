@@ -1,4 +1,3 @@
-from datasets import Dataset
 import pandas as pd
 from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
 from sklearn.preprocessing import LabelEncoder
@@ -15,7 +14,7 @@ import torch.nn as nn
 import os
 import ast
 
-EPOCHS = 2
+EPOCHS = 5
 LEARNING_RATE = 2e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -40,7 +39,7 @@ logging.basicConfig(
     filename=f"{logging_dir}/user_choice_test_run.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
-    filelmode='w'
+    filemode='w'
 )
 
 logger = logging.getLogger()
@@ -72,17 +71,18 @@ class LoggingCallback:
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("User_Choice_or_Control.csv")
+dataframe = pd.read_csv("updated_multilabel_data/User_Choice2.csv")
 
 # Preprocessing
-# split data
-train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
 
 dataframe['Choice Type'] = dataframe['Choice Type'].apply(ast.literal_eval) # convert string to list
 dataframe['Choice Type'] = dataframe['Choice Type'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
 
 dataframe['Choice Scope'] = dataframe['Choice Scope'].apply(ast.literal_eval) # convert string to list
 dataframe['Choice Scope'] = dataframe['Choice Scope'].apply(lambda x: [float(i) for i in x]) # convert elements in list to float
+
+# split data
+train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
 
 
 # # transform to huggingface dataset
@@ -160,7 +160,6 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 model.to(device)
 print(f"Training on device: {device}")
 
-EPOCHS = 10
 
 for epoch in range(EPOCHS):  # Number of epochs
     model.train()
@@ -196,7 +195,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
         # Log progress every 100 batches
         if batch_idx % 100 == 0:
-            print(f"Epoch {epoch+1}/{15}, Batch {batch_idx}/{len(train_dataloader)}, Loss: {total_loss.item():.4f}")
+            print(f"Epoch {epoch+1}/{EPOCHS}, Batch {batch_idx}/{len(train_dataloader)}, Loss: {total_loss.item():.4f}")
 
     # Average loss for the epoch
     avg_loss_epoch = total_loss_epoch / len(train_dataloader)

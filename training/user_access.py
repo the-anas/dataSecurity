@@ -1,4 +1,3 @@
-from datasets import Dataset
 import pandas as pd
 from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
 from sklearn.preprocessing import LabelEncoder
@@ -16,7 +15,7 @@ import ast
 import os
 
 
-EPOCHS = 3
+EPOCHS = 5
 LEARNING_RATE = 2e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -85,7 +84,7 @@ dataframe['Access Scope'] = dataframe['Access Scope'].apply(lambda x: [float(i) 
 
 # Preprocessing
 # split data
-train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
+train_df, eval_df = train_test_split(dataframe, test_size=0.2) # random_state=42    
 
 
 # Tokenize
@@ -129,6 +128,7 @@ class DistilBertForMultiTask(PreTrainedModel):
         pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
 
         # Classification heads
+       
         logits_task1 = self.classifier_task1(pooled_output)
         logits_task2 = self.classifier_task2(pooled_output)
 
@@ -136,7 +136,7 @@ class DistilBertForMultiTask(PreTrainedModel):
         probs_task1 = torch.sigmoid(logits_task1)
         probs_task2 = torch.sigmoid(logits_task2)
 
-        return probs_task1, probs_task2
+        return probs_task1, probs_task2  # logits_task1, logits_task2 
 
 # Initialize the configuration manually if needed
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
@@ -147,14 +147,21 @@ model = DistilBertForMultiTask(config, num_labels_task1=7, num_labels_task2=6)
 # Initialize the optimizer
 optimizer = AdamW(model.parameters(), lr=5e-5)
 
-# Replace loss functions for multi-label classification
-loss_fn_task1 = torch.nn.BCEWithLogitsLoss()
-loss_fn_task2 = torch.nn.BCEWithLogitsLoss()
-
 
 # Training loop with logs
 # Move model to GPU or CPU
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
+pos_weight_type = torch.tensor([ 0.5442,  2,  2,  3,  6,  7, 10]).to(device)
+pos_weight_scope = torch.tensor([ 0.7197,  0.8760,  4.0444,  4.6750,  4.8205, 11.6111]).to(device)
+
+
+# loss functions
+loss_fn_task1 = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight_type)  
+loss_fn_task2 = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight_scope) 
+
+
+
 model.to(device)
 print(f"Training on device: {device}")
 
@@ -180,7 +187,8 @@ for epoch in range(EPOCHS):
         total_loss = loss_task1 + loss_task2
 
         optimizer.zero_grad()
-        total_loss.backward()
+        loss_task1.backward(retain_graph=True)
+        loss_task2.backward()
         optimizer.step()
 
         total_loss_epoch += total_loss.item()
@@ -205,18 +213,29 @@ for epoch in range(EPOCHS):
             attention_mask = attention_mask.to(device)
             labels_task1 = labels_task1.to(device)
             labels_task2 = labels_task2.to(device)
-
+          
             logits_task1, logits_task2 = model(input_ids=input_ids, attention_mask=attention_mask)
-
+       
+            
             # Apply sigmoid and thresholding for multi-label predictions
-            preds_task1 = (logits_task1 > 0.5).int()  # Threshold at 0.5
-            preds_task2 = (logits_task2 > 0.5).int()
+            preds_task1 = (logits_task1 > 0.3).int()  # Threshold at 0.5
+            preds_task2 = (logits_task2 > 0.3).int()
+            print("\n\n")
+            print("Evaluation")
+            print(f"logits_task1: {logits_task1}")
+            print(f"preds_task1: {preds_task1}")
+            print(f"labels_task1: {labels_task1}")
+            print("\n")
+            print(f"logits_task2: {logits_task1}")
+            print(f"preds_task2: {preds_task2}")
+            print(f"labels_task2: {labels_task2}")
+            print("\n\n")
 
             all_preds_task1.extend(preds_task1.cpu().numpy())
             all_preds_task2.extend(preds_task2.cpu().numpy())
             all_labels_task1.extend(labels_task1.cpu().numpy())
             all_labels_task2.extend(labels_task2.cpu().numpy())
-
+      
          # Compute metrics for both tasks
         metrics ={
         'Access Type' : {
@@ -245,6 +264,7 @@ for epoch in range(EPOCHS):
 # Save model after training and evaluation
 # save model state
 torch.save(model.state_dict(), 'user_access_model_state_dict.pth')
+
 
 # save entire  model
 torch.save(model, 'user_access_model_full.pth')
