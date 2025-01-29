@@ -14,10 +14,11 @@ import torch.nn as nn
 import os
 import ast
 
-EPOCHS = 5
-LEARNING_RATE = 2e-5
+EPOCHS = 10
+LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
+THRESHOLD = 0.3
 
 
 # wandb set up
@@ -25,18 +26,22 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+project="Tracking DS Project", name= "User Choice: slight increase of lr, up to 5e-3",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
+    #"learning_rate_AS": LR_AS,
     "Batch_size": BATCH_SIZE,
     "epochs": EPOCHS,
+    "threshold": THRESHOLD
 },
+# notes="Training user_choice, lower training rate with lower threshold",
+group = "User Choice"
 )
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/user_choice_test_run.txt",  # Log file location
+    filename=f"{logging_dir}/user_choice_logs.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
     filemode='w'
@@ -84,12 +89,6 @@ dataframe['Choice Scope'] = dataframe['Choice Scope'].apply(lambda x: [float(i) 
 # split data
 train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=42)
 
-
-# # transform to huggingface dataset
-# train_dataset = Dataset.from_pandas(train_df)
-# eval_dataset = Dataset.from_pandas(eval_df)
-
-
 # Tokenize
 
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
@@ -121,6 +120,7 @@ class DistilBertForMultiTask(PreTrainedModel):
     def __init__(self, config, num_labels_task1, num_labels_task2):
         super().__init__(config)
         self.distilbert = DistilBertModel(config)
+        self.dropout = nn.Dropout(0.3) # Dropout layer
 
         # Output heads for each task
         self.classifier_task1 = nn.Linear(config.dim, num_labels_task1)
@@ -128,7 +128,8 @@ class DistilBertForMultiTask(PreTrainedModel):
 
     def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None):
         outputs = self.distilbert(input_ids, attention_mask=attention_mask)
-        pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
+        pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
+        # pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
 
         # Classification heads
         logits_task1 = self.classifier_task1(pooled_output)
@@ -138,7 +139,7 @@ class DistilBertForMultiTask(PreTrainedModel):
         probs_task1 = torch.sigmoid(logits_task1)
         probs_task2 = torch.sigmoid(logits_task2)
 
-        return probs_task1, probs_task2
+        return logits_task1, logits_task2 # probs_task1, probs_task2
 
 # Initialize the configuration manually if needed
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
@@ -148,7 +149,7 @@ model = DistilBertForMultiTask(config, num_labels_task1=9, num_labels_task2=5)
 
 
 # Initialize the optimizer
-optimizer = AdamW(model.parameters(), lr=5e-5)
+optimizer = AdamW(model.parameters(), lr=LEARNING_RATE) # 5e-5
 
 # Loss functions for each task
 loss_fn_task1 = torch.nn.BCEWithLogitsLoss()
@@ -225,8 +226,8 @@ for epoch in range(EPOCHS):  # Number of epochs
             logits_task1, logits_task2 = model(input_ids=input_ids, attention_mask=attention_mask)
 
             # Apply sigmoid and thresholding for multi-label predictions
-            preds_task1 = (logits_task1 > 0.5).int()  # Threshold at 0.5
-            preds_task2 = (logits_task2 > 0.5).int()
+            preds_task1 = (logits_task1 > THRESHOLD).int()  # Threshold at 0.5
+            preds_task2 = (logits_task2 > THRESHOLD).int()
 
             # Collect predictions and true labels for metrics computation
             all_preds_task1.extend(preds_task1.cpu().numpy())
@@ -235,7 +236,7 @@ for epoch in range(EPOCHS):  # Number of epochs
             all_labels_task2.extend(labels_task2.cpu().numpy())
 
          # Compute metrics
-        metrics ={
+            metrics ={
         'Choice Type' : {
             'exact_match': np.mean(np.all(np.array(all_labels_task1) == np.array(all_preds_task1), axis=1)),
             'multilabel_accuracy': np.mean(( np.array(all_labels_task1) == np.array(all_preds_task1)).mean(axis=0)),
@@ -252,6 +253,21 @@ for epoch in range(EPOCHS):  # Number of epochs
             }
         }
 
+        wandb.log(
+        {
+            'exact_match_CT': metrics['Choice Type']['exact_match'],
+            'multilabel_accuracy_CT': metrics['Choice Type']['multilabel_accuracy'],
+            'f1_macro_CT': metrics['Choice Type']['f1_macro'],
+            'f1_micro_CT': metrics['Choice Type']['f1_micro'],
+            'hamming_loss_CT': metrics['Choice Type']['hamming_loss'],
+       
+            'exact_match_CS': metrics['Choice Scope']['exact_match'],
+            'multilabel_accuracy_CS': metrics['Choice Scope']['multilabel_accuracy'],
+            'f1_macro_CS': metrics['Choice Scope']['f1_macro'],
+            'f1_micro_CS': metrics['Choice Scope']['f1_micro'],
+            'hamming_loss_CS': metrics['Choice Scope']['hamming_loss'],
+    })
+
         # Call the logging callback
         callback = LoggingCallback()
         callback.on_evaluate(metrics=metrics, epoch=epoch)
@@ -259,7 +275,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
 # Save model after training and evaluation
 # save model state
-torch.save(model.state_dict(), 'choice_access_model_state_dict.pth')
+torch.save(model.state_dict(), 'user_model_state_dict.pth')
 
 # save entire  model
-torch.save(model, 'choice_choice_model_full.pth')
+torch.save(model, 'user_choice_model_full.pth')

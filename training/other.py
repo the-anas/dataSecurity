@@ -14,8 +14,8 @@ import ast
 from sklearn.metrics import accuracy_score, f1_score, hamming_loss
 import numpy as np
 
-EPOCHS = 5
-LEARNING_RATE = 5e-5   
+EPOCHS = 10
+LEARNING_RATE = 5e-3   
 BATCH_SIZE = 8
 WEIGHT_DECAY = 0.01
 logging_dir = "./training_metrics_logs"
@@ -25,13 +25,14 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
     # Set the project where this run will be logged
-    project="Annotating Privacy Policies", name= "Other model: testing multilabel classification",
+    project="Tracking DS Project", name= "train longer with higher lr 5e-3",
     # Track hyperparameters and run metadata
     config={
         "learning_rate": LEARNING_RATE,
         "Batch_size": BATCH_SIZE,
         "epochs": EPOCHS,
     },
+    group = "Other Model"
 #    notes = "Lowered learning rate and batch size, increased epochs, and increased weight decay"
 )
 
@@ -91,10 +92,6 @@ def tokenize_function(examples):
 # Tokenize the dataset
 train_tokenized_dataset = train_dataset.map(tokenize_function, batched=True)
 eval_tokenized_dataset = eval_dataset.map(tokenize_function, batched=True)
-
-# Prepare DataLoader
-# small_train_dataset = train_tokenized_dataset.shuffle(seed=42).select(range(200))  # Small subset for example
-# small_eval_dataset = eval_tokenized_dataset.shuffle(seed=42).select(range(100))
 
 model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased",
                                                             num_labels=4,

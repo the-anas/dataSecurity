@@ -33,6 +33,7 @@ config={
     "Batch_size": BATCH_SIZE,
     "epochs": EPOCHS,
 },
+group = "Data Security Model"
 )
 
 # set up logger

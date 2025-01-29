@@ -4,7 +4,7 @@ from transformers import TrainerCallback, DistilBertForSequenceClassification, D
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.metrics import accuracy_score, f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss
 import wandb
 import logging
 import os
@@ -15,24 +15,25 @@ import ast
 import numpy as np
 
 
-EPOCHS = 2
-LEARNING_RATE = 2e-5
+EPOCHS = 15
+LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
-
+THRESHOLD = 0.3
 
 # wandb set up
 os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB logs
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+project="Tracking DS Project", name= "Run after fixing issue with logging",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
     "Batch_size": BATCH_SIZE,
     "epochs": EPOCHS,
 },
+group = "Data Retention"
 )
 
 # set up logger
@@ -121,7 +122,8 @@ class DistilBertMultiLabel(nn.Module):
     def __init__(self, num_labels_task1, num_labels_task2, num_labels_task3):
         super(DistilBertMultiLabel, self).__init__()
         self.distilbert = DistilBertModel.from_pretrained("distilbert-base-uncased")
-
+        self.dropout = nn.Dropout(0.3)
+        
         # Multi-label classification heads
         self.classifier_task1 = nn.Linear(self.distilbert.config.hidden_size, num_labels_task1)
         self.classifier_task2 = nn.Linear(self.distilbert.config.hidden_size, num_labels_task2)
@@ -130,22 +132,24 @@ class DistilBertMultiLabel(nn.Module):
     def forward(self, input_ids, attention_mask):
         # Get the hidden states from DistilBERT
         outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_mask)
-        hidden_state = outputs.last_hidden_state  # Shape: (batch_size, seq_len, hidden_size)
+        # hidden_state = outputs.last_hidden_state  # Shape: (batch_size, seq_len, hidden_size)
 
         # Use the [CLS] token (first token in sequence) for classification
-        cls_token_embedding = hidden_state[:, 0, :]  # Shape: (batch_size, hidden_size)
+        # cls_token_embedding = hidden_state[:, 0, :]  # Shape: (batch_size, hidden_size)
+
+        pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
 
         # Compute logits for each task
-        logits_task1 = self.classifier_task1(cls_token_embedding)
-        logits_task2 = self.classifier_task2(cls_token_embedding)
-        logits_task3 = self.classifier_task3(cls_token_embedding)
+        logits_task1 = self.classifier_task1(pooled_output)
+        logits_task2 = self.classifier_task2(pooled_output)
+        logits_task3 = self.classifier_task3(pooled_output)
 
         # Apply sigmoid for multi-label probabilities
-        probs_task1 = torch.sigmoid(logits_task1)
-        probs_task2 = torch.sigmoid(logits_task2)
-        probs_task3 = torch.sigmoid(logits_task3)
+        # probs_task1 = torch.sigmoid(logits_task1)
+        # probs_task2 = torch.sigmoid(logits_task2)
+        # probs_task3 = torch.sigmoid(logits_task3)
 
-        return probs_task1, probs_task2, probs_task3    
+        return logits_task1, logits_task2, logits_task3 #probs_task1, probs_task2, probs_task3    
 
 # Initialize the configuration manually if needed
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
@@ -157,7 +161,7 @@ from transformers import AdamW
 import torch
 
 # Initialize the optimizer
-optimizer = AdamW(model.parameters(), lr=5e-5)
+optimizer = AdamW(model.parameters(), lr= LEARNING_RATE)
 
 # Loss functions for each task
 loss_fn_task1 =  nn.BCEWithLogitsLoss()
@@ -237,9 +241,9 @@ for epoch in range(EPOCHS):  # Number of epochs
             logits_task1, logits_task2, logits_task3 = model(input_ids=input_ids, attention_mask=attention_mask)
 
             # Get predictions by taking the class with the highest logit value
-            preds_task1 = (logits_task1 > 0.5).int()
-            preds_task2 = (logits_task2 > 0.5).int() 
-            preds_task3 = (logits_task3 > 0.5).int()
+            preds_task1 = (logits_task1 > THRESHOLD).int()
+            preds_task2 = (logits_task2 > THRESHOLD).int() 
+            preds_task3 = (logits_task3 > THRESHOLD).int()
 
             # Collect predictions and true labels for metrics computation
             all_preds_task1.extend(preds_task1.cpu().numpy())
@@ -252,21 +256,21 @@ for epoch in range(EPOCHS):  # Number of epochs
 
         # Compute metrics
         metrics ={
-        'Task 1' : {
+        'Retention Period' : {
             'exact_match': np.mean(np.all(np.array(all_labels_task1) == np.array(all_preds_task1), axis=1)),
             'multilabel_accuracy': np.mean(( np.array(all_labels_task1) == np.array(all_preds_task1)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task1, all_preds_task1, average="macro"),
             'f1_micro': f1_score(all_labels_task1, all_preds_task1, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task1, all_preds_task1),
             },
-        'Task 2' : {
+        'Personal Information Type' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
             'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
             'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
             'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
             }, 
-        'Task 3' : {
+        'Retention Purpose' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=1)),
             'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=0)),
             'f1_macro': f1_score(all_labels_task3, all_preds_task3, average="macro"),
@@ -274,6 +278,30 @@ for epoch in range(EPOCHS):  # Number of epochs
             'hamming_loss': hamming_loss(all_labels_task3, all_preds_task3),
             }
         }
+
+        wandb.log(
+        {
+            'exact_match_RP': metrics['Retention Period']['exact_match'],
+            'multilabel_accuracy_RP': metrics['Retention Period']['multilabel_accuracy'],
+            'f1_macro_RP': metrics['Retention Period']['f1_macro'],
+            'f1_micro_RP': metrics['Retention Period']['f1_micro'],
+            'hamming_loss_RP': metrics['Retention Period']['hamming_loss'],
+       
+            'exact_match_PIT': metrics['Personal Information Type']['exact_match'],
+            'multilabel_accuracy_PIT': metrics['Personal Information Type']['multilabel_accuracy'],
+            'f1_macro_PIT': metrics['Personal Information Type']['f1_macro'],
+            'f1_micro_PIT': metrics['Personal Information Type']['f1_micro'],
+            'hamming_loss_PIT': metrics['Personal Information Type']['hamming_loss'],
+
+            
+            'exact_match_RPur': metrics['Retention Purpose']['exact_match'],
+            'multilabel_accuracy_RPur': metrics['Retention Purpose']['multilabel_accuracy'],
+            'f1_macro_RPur': metrics['Retention Purpose']['f1_macro'],
+            'f1_micro_RPur': metrics['Retention Purpose']['f1_micro'],
+            'hamming_loss_RPur': metrics['Retention Purpose']['hamming_loss'],
+
+
+    })
 
         # Call the logging callback
         callback = LoggingCallback()
@@ -286,3 +314,5 @@ torch.save(model.state_dict(), 'data_retention_model_state_dict.pth')
 
 # save entire  model
 torch.save(model, 'data_retention_model_full.pth')
+
+print("Done.")

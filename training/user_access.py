@@ -1,9 +1,8 @@
 import pandas as pd
 from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
-from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.metrics import accuracy_score, f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss
 import wandb 
 import logging
 import torch
@@ -15,8 +14,9 @@ import ast
 import os
 
 
-EPOCHS = 5
-LEARNING_RATE = 2e-5
+EPOCHS = 10
+LR_AT = 0.01 #5e-5
+#LR_AS = 0.1 #5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
 
@@ -27,13 +27,16 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+project="Tracking DS Project", name= "User Access: switch ordoer of backward step around",
 # Track hyperparameters and run metadata
 config={
-    "learning_rate": LEARNING_RATE,
+    "learning_rate": LR_AT,
+    #"learning_rate_AS": LR_AS,
     "Batch_size": BATCH_SIZE,
     "epochs": EPOCHS,
 },
+notes="Training user_access, testing switch ordoer of backward step around effects tasks",
+group = "User Access"
 )
 
 # set up logger
@@ -84,7 +87,7 @@ dataframe['Access Scope'] = dataframe['Access Scope'].apply(lambda x: [float(i) 
 
 # Preprocessing
 # split data
-train_df, eval_df = train_test_split(dataframe, test_size=0.2) # random_state=42    
+train_df, eval_df = train_test_split(dataframe, test_size=0.2, random_state=23) # random_state=42    
 
 
 # Tokenize
@@ -119,13 +122,16 @@ class DistilBertForMultiTask(PreTrainedModel):
         super().__init__(config)
         self.distilbert = DistilBertModel(config)
 
+        self.dropout = nn.Dropout(0.3) # Dropout layer
+
         # Output heads for each task
         self.classifier_task1 = nn.Linear(config.dim, num_labels_task1)
         self.classifier_task2 = nn.Linear(config.dim, num_labels_task2)
 
     def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None):
         outputs = self.distilbert(input_ids, attention_mask=attention_mask)
-        pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
+        pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
+        # pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
 
         # Classification heads
        
@@ -133,10 +139,10 @@ class DistilBertForMultiTask(PreTrainedModel):
         logits_task2 = self.classifier_task2(pooled_output)
 
         # Add sigmoid for multi-label classification
-        probs_task1 = torch.sigmoid(logits_task1)
-        probs_task2 = torch.sigmoid(logits_task2)
+        # probs_task1 = torch.sigmoid(logits_task1)
+        # probs_task2 = torch.sigmoid(logits_task2)
 
-        return probs_task1, probs_task2  # logits_task1, logits_task2 
+        return  logits_task1, logits_task2 # probs_task1, probs_task2   
 
 # Initialize the configuration manually if needed
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
@@ -145,20 +151,21 @@ config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
 model = DistilBertForMultiTask(config, num_labels_task1=7, num_labels_task2=6)
 
 # Initialize the optimizer
-optimizer = AdamW(model.parameters(), lr=5e-5)
+# optimizer = torch.optim.Adam([
+#     {"params": model.classifier_task1.parameters(), "lr": LR_AT},
+#     {"params": model.classifier_task2.parameters(), "lr": LR_AS}
+# ])
+
+optimizer = AdamW(model.parameters(), lr=0.01)
 
 
 # Training loop with logs
 # Move model to GPU or CPU
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
-pos_weight_type = torch.tensor([ 0.5442,  2,  2,  3,  6,  7, 10]).to(device)
-pos_weight_scope = torch.tensor([ 0.7197,  0.8760,  4.0444,  4.6750,  4.8205, 11.6111]).to(device)
-
-
 # loss functions
-loss_fn_task1 = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight_type)  
-loss_fn_task2 = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight_scope) 
+loss_fn_task1 = torch.nn.BCEWithLogitsLoss() # pos_weight=pos_weight_type  
+loss_fn_task2 = torch.nn.BCEWithLogitsLoss() # pos_weight=pos_weight_scope 
 
 
 
@@ -186,9 +193,16 @@ for epoch in range(EPOCHS):
 
         total_loss = loss_task1 + loss_task2
 
+        print("\n\n")
+        print("Losses")
+        print(f"loss_task1: {loss_task1}")
+        print(f"loss_task2: {loss_task2}")
+
         optimizer.zero_grad()
-        loss_task1.backward(retain_graph=True)
-        loss_task2.backward()
+
+        loss_task2.backward(retain_graph=True)
+        loss_task1.backward()
+        
         optimizer.step()
 
         total_loss_epoch += total_loss.item()
@@ -254,12 +268,28 @@ for epoch in range(EPOCHS):
             }
         }
 
+        wandb.log(
+        {
+            'exact_match_AT': metrics['Access Type']['exact_match'],
+            'multilabel_accuracy_AT': metrics['Access Type']['multilabel_accuracy'],
+            'f1_macro_AT': metrics['Access Type']['f1_macro'],
+            'f1_micro_AT': metrics['Access Type']['f1_micro'],
+            'hamming_loss_AT': metrics['Access Type']['hamming_loss'],
+       
+            'exact_match_AS': metrics['Access Scope']['exact_match'],
+            'multilabel_accuracy_AS': metrics['Access Scope']['multilabel_accuracy'],
+            'f1_macro_AS': metrics['Access Scope']['f1_macro'],
+            'f1_micro_AS': metrics['Access Scope']['f1_micro'],
+            'hamming_loss_AS': metrics['Access Scope']['hamming_loss'],
+    })
+
         # Call the logging callback
         callback = LoggingCallback()
         callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 
 
+wandb.finish()  
 
 # Save model after training and evaluation
 # save model state

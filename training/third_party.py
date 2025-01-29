@@ -1,9 +1,8 @@
 import pandas as pd
 from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
-from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.metrics import accuracy_score, f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss
 import wandb
 import logging
 import numpy as np
@@ -13,29 +12,30 @@ import torch
 from transformers import AdamW
 
 
-EPOCHS = 2
-LEARNING_RATE = 2e-5
+EPOCHS = 10
+LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
-
+THRESHOLD = 0.3
 
 # wandb set up
 os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+project="Tracking DS Project", name= "lowering threshold to 0.3", 
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
     "Batch_size": BATCH_SIZE,
     "epochs": EPOCHS,
 },
+group = "Third Party Model"
 )
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/third_party_test_run.txt",  # Log file location
+    filename=f"{logging_dir}/third_party_logs.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
     filemode = 'w'
@@ -118,6 +118,7 @@ class DistilBertForMultiTask(PreTrainedModel):
     def __init__(self, config, num_labels_task1, num_labels_task2, num_labels_task3):
         super().__init__(config)
         self.distilbert = DistilBertModel(config)
+        self.dropout = nn.Dropout(0.3)
 
         # Output heads for each task
         self.classifier_task1 = nn.Linear(config.dim, num_labels_task1)
@@ -126,7 +127,8 @@ class DistilBertForMultiTask(PreTrainedModel):
 
     def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None, labels_task3=None):
         outputs = self.distilbert(input_ids, attention_mask=attention_mask)
-        pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
+        # pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
+        pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
 
         logits_task1 = self.classifier_task1(pooled_output)
         logits_task2 = self.classifier_task2(pooled_output)
@@ -144,7 +146,7 @@ model = DistilBertForMultiTask(config, num_labels_task1=6, num_labels_task2=15, 
 
 
 # Initialize the optimizer
-optimizer = AdamW(model.parameters(), lr=5e-5)
+optimizer = AdamW(model.parameters(), lr=LEARNING_RATE)
 
 # Loss functions for each task
 loss_fn_task1 = torch.nn.CrossEntropyLoss()
@@ -224,9 +226,9 @@ for epoch in range(EPOCHS):  # Number of epochs
             logits_task1, logits_task2, logits_task3 = model(input_ids=input_ids, attention_mask=attention_mask)
 
             # Get predictions by taking the class with the highest logit value
-            preds_task1 = (logits_task1 > 0.5).int()
-            preds_task2 = (logits_task2 > 0.5).int()
-            preds_task3 = (logits_task3 > 0.5).int()
+            preds_task1 = (logits_task1 > THRESHOLD).int()
+            preds_task2 = (logits_task2 > THRESHOLD).int()
+            preds_task3 = (logits_task3 > THRESHOLD).int()
 
             # Collect predictions and true labels for metrics computation
             all_preds_task1.extend(preds_task1.cpu().numpy())
@@ -239,21 +241,21 @@ for epoch in range(EPOCHS):  # Number of epochs
 
         # Compute metrics
         metrics ={
-        'Task 1' : {
+        'Action' : {
             'exact_match': np.mean(np.all(np.array(all_labels_task1) == np.array(all_preds_task1), axis=1)),
             'multilabel_accuracy': np.mean(( np.array(all_labels_task1) == np.array(all_preds_task1)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task1, all_preds_task1, average="macro"),
             'f1_micro': f1_score(all_labels_task1, all_preds_task1, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task1, all_preds_task1),
             },
-        'Task 2' : {
+        'Personal Information' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
             'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
             'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
             'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
             }, 
-        'Task 3' : {
+        'Purpose' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=1)),
             'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=0)),
             'f1_macro': f1_score(all_labels_task3, all_preds_task3, average="macro"),
@@ -263,12 +265,36 @@ for epoch in range(EPOCHS):  # Number of epochs
         
         }
 
+        wandb.log(
+        {
+            'exact_match_CM': metrics['Action']['exact_match'],
+            'multilabel_accuracy_CM': metrics['Action']['multilabel_accuracy'],
+            'f1_macro_CM': metrics['Action']['f1_macro'],
+            'f1_micro_CM': metrics['Action']['f1_micro'],
+            'hamming_loss_CM': metrics['Action']['hamming_loss'],
+       
+            'exact_match_PIT': metrics['Personal Information']['exact_match'],
+            'multilabel_accuracy_PIT': metrics['Personal Information']['multilabel_accuracy'],
+            'f1_macro_PIT': metrics['Personal Information']['f1_macro'],
+            'f1_micro_PIT': metrics['Personal Information']['f1_micro'],
+            'hamming_loss_PIT': metrics['Personal Information']['hamming_loss'],
+
+            
+            'exact_match_P': metrics['Purpose']['exact_match'],
+            'multilabel_accuracy_P': metrics['Purpose']['multilabel_accuracy'],
+            'f1_macro_P': metrics['Purpose']['f1_macro'],
+            'f1_micro_P': metrics['Purpose']['f1_micro'],
+            'hamming_loss_P': metrics['Purpose']['hamming_loss'],
+
+
+    })
+
         # Call the logging callback
         callback = LoggingCallback()
         callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 # save model state
-torch.save(model.state_dict(), 'third_party_model_10epoch_underfitted.pth')
+torch.save(model.state_dict(), 'third_party_model.pth')
 
 # save entire  model
-torch.save(model, 'third_party_model_full_10epoch_underfitted.pth')
+torch.save(model, 'third_party_model_full.pth')
