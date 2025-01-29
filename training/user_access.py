@@ -14,8 +14,8 @@ import ast
 import os
 
 
-EPOCHS = 10
-LR_AT = 0.01 #5e-5
+EPOCHS = 25
+LR_AT = 5e-5
 #LR_AS = 0.1 #5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -26,8 +26,9 @@ logging_dir = "./training_metrics_logs"
 os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB logs
 wandb.login()
 run = wandb.init(
+    # mode="offline",
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "User Access: switch ordoer of backward step around",
+project="Tracking DS Project", name= "60 epochs attempt to test very long runs",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LR_AT,
@@ -48,6 +49,9 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger()
+# for handler in logger.handlers[:]:
+#     if isinstance(handler, logging.StreamHandler):  # Removes console output
+#         logger.removeHandler(handler)
 
 class LoggingCallback:
     def __init__(self):
@@ -64,10 +68,10 @@ class LoggingCallback:
             metrics: A dictionary containing the evaluation metrics.
         """
         self.logger.info(f"--- Evaluation Metrics for Epoch {epoch} ---")
-        print(f"metrics: {metrics}")
+        #print(f"metrics: {metrics}")
         for task, task_metrics in metrics.items():
-            print(f"task: {task}")
-            print(f"task metrics: {task_metrics}")
+            # print(f"task: {task}")
+            # print(f"task metrics: {task_metrics}")
             self.logger.info(f"Task: {task}")
             for metric_name, metric_value in task_metrics.items():
                 self.logger.info(f"    {metric_name}: {metric_value:.4f}")
@@ -156,7 +160,7 @@ model = DistilBertForMultiTask(config, num_labels_task1=7, num_labels_task2=6)
 #     {"params": model.classifier_task2.parameters(), "lr": LR_AS}
 # ])
 
-optimizer = AdamW(model.parameters(), lr=0.01)
+optimizer = AdamW(model.parameters(), lr=LR_AT)
 
 
 # Training loop with logs
@@ -192,11 +196,6 @@ for epoch in range(EPOCHS):
         loss_task2 = loss_fn_task2(logits_task2, labels_task2)
 
         total_loss = loss_task1 + loss_task2
-
-        print("\n\n")
-        print("Losses")
-        print(f"loss_task1: {loss_task1}")
-        print(f"loss_task2: {loss_task2}")
 
         optimizer.zero_grad()
 
@@ -240,7 +239,7 @@ for epoch in range(EPOCHS):
             print(f"preds_task1: {preds_task1}")
             print(f"labels_task1: {labels_task1}")
             print("\n")
-            print(f"logits_task2: {logits_task1}")
+            print(f"logits_task2: {logits_task2}")
             print(f"preds_task2: {preds_task2}")
             print(f"labels_task2: {labels_task2}")
             print("\n\n")
@@ -254,20 +253,24 @@ for epoch in range(EPOCHS):
         metrics ={
         'Access Type' : {
             'exact_match': np.mean(np.all(np.array(all_labels_task1) == np.array(all_preds_task1), axis=1)),
-            'multilabel_accuracy': np.mean(( np.array(all_labels_task1) == np.array(all_preds_task1)).mean(axis=0)),
+            'multilabel_accuracy': np.mean((np.array(all_labels_task1) == np.array(all_preds_task1)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task1, all_preds_task1, average="macro"),
             'f1_micro': f1_score(all_labels_task1, all_preds_task1, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task1, all_preds_task1),
             },
         'Access Scope' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
-            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
+            'multilabel_accuracy':  np.mean((np.array(all_labels_task2) == np.array(all_preds_task2)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
             'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
             }
         }
 
+        print("\n\n")
+        print("accuracy for task 1: ", metrics['Access Type']['multilabel_accuracy'])
+        print("accuracy for task 2: ", metrics['Access Scope']['multilabel_accuracy'])
+        print("\n\n")
         wandb.log(
         {
             'exact_match_AT': metrics['Access Type']['exact_match'],
