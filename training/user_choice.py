@@ -14,7 +14,7 @@ import torch.nn as nn
 import os
 import ast
 
-EPOCHS = 25
+EPOCHS = 10
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -26,7 +26,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Running model 20 epochs",
+project="Tracking DS Project", name= "Attempting to fix accuracy bug",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -64,10 +64,10 @@ class LoggingCallback:
             metrics: A dictionary containing the evaluation metrics.
         """
         self.logger.info(f"--- Evaluation Metrics for Epoch {epoch} ---")
-        print(f"metrics: {metrics}")
+        # print(f"metrics: {metrics}")
         for task, task_metrics in metrics.items():
-            print(f"task: {task}")
-            print(f"task metrics: {task_metrics}")
+            # print(f"task: {task}")
+            # print(f"task metrics: {task_metrics}")
             self.logger.info(f"Task: {task}")
             for metric_name, metric_value in task_metrics.items():
                 self.logger.info(f"    {metric_name}: {metric_value:.4f}")
@@ -246,7 +246,7 @@ for epoch in range(EPOCHS):  # Number of epochs
             },
         'Choice Scope' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
-            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
+            'multilabel_accuracy':  np.mean(( np.array(all_labels_task2) == np.array(all_preds_task2)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
             'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
@@ -275,7 +275,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
 # Save model after training and evaluation
 # save model state
-torch.save(model.state_dict(), '/mnt/data/user_choice/user_choice_model_state_dict.pth')
+# torch.save(model.state_dict(), '/mnt/data/user_choice/user_choice_model_state_dict.pth')
 
 # save entire  model
-torch.save(model, '/mnt/data/user_choice/user_choice_model_full.pth')
+# torch.save(model, '/mnt/data/user_choice/user_choice_model_full.pth')

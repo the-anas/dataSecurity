@@ -26,7 +26,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Increasing learning rate to 5e-3",
+project="Tracking DS Project", name= "Fixing Accuracy Bug",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -263,14 +263,14 @@ for epoch in range(EPOCHS):  # Number of epochs
             },
         'Personal Information Type' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
-            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
+            'multilabel_accuracy':   np.mean(( np.array(all_labels_task2) == np.array(all_preds_task2)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
             'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
             }, 
         'Purpose' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=1)),
-            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=0)),
+            'multilabel_accuracy':   np.mean(( np.array(all_labels_task3) == np.array(all_preds_task3)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task3, all_preds_task3, average="macro"),
             'f1_micro': f1_score(all_labels_task3, all_preds_task3, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task3, all_preds_task3),
@@ -308,7 +308,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
 # Save model after training and evaluation
 # save model state
-torch.save(model.state_dict(), 'first_party_model_state_dict.pth')
+# torch.save(model.state_dict(), 'first_party_model_state_dict.pth')
 
 # save entire  model
-torch.save(model, 'first_party_model_full.pth')
+# torch.save(model, 'first_party_model_full.pth')

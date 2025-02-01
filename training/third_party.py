@@ -12,7 +12,7 @@ import torch
 from transformers import AdamW
 
 
-EPOCHS = 30
+EPOCHS = 10
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -23,7 +23,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "training for 30 epochs", 
+project="Tracking DS Project", name= "Attempt to fix 0 accuracy bug", 
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -61,8 +61,8 @@ class LoggingCallback(TrainerCallback):
         self.logger.info(f"--- Evaluation Metrics for Epoch {epoch} ---")
         print(f"metrics: {metrics}")
         for task, task_metrics in metrics.items():
-            print(f"task: {task}")
-            print(f"task metrics: {task_metrics}")
+            # print(f"task: {task}")
+            # print(f"task metrics: {task_metrics}")
             self.logger.info(f"Task: {task}")
             for metric_name, metric_value in task_metrics.items():
                 self.logger.info(f"    {metric_name}: {metric_value:.4f}")
@@ -250,14 +250,14 @@ for epoch in range(EPOCHS):  # Number of epochs
             },
         'Personal Information' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=1)),
-            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task2)== np.array(all_preds_task2), axis=0)),
+            'multilabel_accuracy':  np.mean((np.array(all_labels_task2) == np.array(all_preds_task2)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task2, all_preds_task2, average="macro"),
             'f1_micro': f1_score(all_labels_task2, all_preds_task2, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task2, all_preds_task2),
             }, 
         'Purpose' : {
             'exact_match':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=1)),
-            'multilabel_accuracy':  np.mean(np.all(np.array(all_labels_task3)== np.array(all_preds_task3), axis=0)),
+            'multilabel_accuracy':  np.mean((np.array(all_labels_task3) == np.array(all_preds_task3)).mean(axis=0)),
             'f1_macro': f1_score(all_labels_task3, all_preds_task3, average="macro"),
             'f1_micro': f1_score(all_labels_task3, all_preds_task3, average="micro"),
             'hamming_loss': hamming_loss(all_labels_task3, all_preds_task3),
@@ -294,7 +294,7 @@ for epoch in range(EPOCHS):  # Number of epochs
         callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 # save model state
-torch.save(model.state_dict(), '/mnt/data/models/third_party/third_party_model.pth')
+# torch.save(model.state_dict(), '/mnt/data/models/third_party/third_party_model.pth')
 
 # save entire  model
-torch.save(model, '/mnt/data/models/third_party/third_party_model_full.pth')
+# torch.save(model, '/mnt/data/models/third_party/third_party_model_full.pth')
