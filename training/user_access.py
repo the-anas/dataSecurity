@@ -28,7 +28,7 @@ wandb.login()
 run = wandb.init(
     # mode="offline",
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "60 epochs attempt to test very long runs",
+project="Tracking DS Project", name= "Attempt to train actual model",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LR_AT,
@@ -169,9 +169,7 @@ device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 
 # loss functions
 loss_fn_task1 = torch.nn.BCEWithLogitsLoss() # pos_weight=pos_weight_type  
-loss_fn_task2 = torch.nn.BCEWithLogitsLoss() # pos_weight=pos_weight_scope 
-
-
+loss_fn_task2 = torch.nn.BCEWithLogitsLoss() # pos_weight=pos_weight_scope  
 
 model.to(device)
 print(f"Training on device: {device}")
@@ -233,16 +231,6 @@ for epoch in range(EPOCHS):
             # Apply sigmoid and thresholding for multi-label predictions
             preds_task1 = (logits_task1 > 0.3).int()  # Threshold at 0.5
             preds_task2 = (logits_task2 > 0.3).int()
-            print("\n\n")
-            print("Evaluation")
-            print(f"logits_task1: {logits_task1}")
-            print(f"preds_task1: {preds_task1}")
-            print(f"labels_task1: {labels_task1}")
-            print("\n")
-            print(f"logits_task2: {logits_task2}")
-            print(f"preds_task2: {preds_task2}")
-            print(f"labels_task2: {labels_task2}")
-            print("\n\n")
 
             all_preds_task1.extend(preds_task1.cpu().numpy())
             all_preds_task2.extend(preds_task2.cpu().numpy())
@@ -267,10 +255,6 @@ for epoch in range(EPOCHS):
             }
         }
 
-        print("\n\n")
-        print("accuracy for task 1: ", metrics['Access Type']['multilabel_accuracy'])
-        print("accuracy for task 2: ", metrics['Access Scope']['multilabel_accuracy'])
-        print("\n\n")
         wandb.log(
         {
             'exact_match_AT': metrics['Access Type']['exact_match'],
@@ -296,9 +280,9 @@ wandb.finish()
 
 # Save model after training and evaluation
 # save model state
-torch.save(model.state_dict(), 'user_access_model_state_dict.pth')
+torch.save(model.state_dict(), '/mnt/data/models/user_access/user_access_model_state_dict.pth')
 
 
 # save entire  model
-torch.save(model, 'user_access_model_full.pth')
+torch.save(model, '/mnt/data/models/user_access/user_access_model_full.pth')
 

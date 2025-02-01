@@ -14,7 +14,7 @@ import torch.nn as nn
 import os
 import ast
 
-EPOCHS = 10
+EPOCHS = 25
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -26,7 +26,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "User Choice: slight increase of lr, up to 5e-3",
+project="Tracking DS Project", name= "Running model 20 epochs",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -275,7 +275,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
 # Save model after training and evaluation
 # save model state
-torch.save(model.state_dict(), 'user_model_state_dict.pth')
+torch.save(model.state_dict(), '/mnt/data/user_choice/user_choice_model_state_dict.pth')
 
 # save entire  model
-torch.save(model, 'user_choice_model_full.pth')
+torch.save(model, '/mnt/data/user_choice/user_choice_model_full.pth')

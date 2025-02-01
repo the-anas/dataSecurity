@@ -12,7 +12,7 @@ import torch
 from transformers import AdamW
 
 
-EPOCHS = 10
+EPOCHS = 30
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -23,7 +23,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "lowering threshold to 0.3", 
+project="Tracking DS Project", name= "training for 30 epochs", 
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -294,7 +294,7 @@ for epoch in range(EPOCHS):  # Number of epochs
         callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 # save model state
-torch.save(model.state_dict(), 'third_party_model.pth')
+torch.save(model.state_dict(), '/mnt/data/models/third_party/third_party_model.pth')
 
 # save entire  model
-torch.save(model, 'third_party_model_full.pth')
+torch.save(model, '/mnt/data/models/third_party/third_party_model_full.pth')
