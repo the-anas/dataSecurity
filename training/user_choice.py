@@ -1,9 +1,8 @@
 import pandas as pd
-from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
-from sklearn.preprocessing import LabelEncoder
+from transformers import DistilBertTokenizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.metrics import accuracy_score, f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss
 import wandb
 import logging
 from transformers import AdamW
@@ -14,7 +13,7 @@ import torch.nn as nn
 import os
 import ast
 
-EPOCHS = 10
+EPOCHS = 70
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -26,7 +25,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Attempting to fix accuracy bug",
+project="Tracking DS Project", name= "70 epoch attempt",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -129,17 +128,11 @@ class DistilBertForMultiTask(PreTrainedModel):
     def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None):
         outputs = self.distilbert(input_ids, attention_mask=attention_mask)
         pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
-        # pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
 
-        # Classification heads
         logits_task1 = self.classifier_task1(pooled_output)
         logits_task2 = self.classifier_task2(pooled_output)
 
-        # Add sigmoid for multi-label classification
-        probs_task1 = torch.sigmoid(logits_task1)
-        probs_task2 = torch.sigmoid(logits_task2)
-
-        return logits_task1, logits_task2 # probs_task1, probs_task2
+        return logits_task1, logits_task2 
 
 # Initialize the configuration manually if needed
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
@@ -275,7 +268,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
 # Save model after training and evaluation
 # save model state
-# torch.save(model.state_dict(), '/mnt/data/user_choice/user_choice_model_state_dict.pth')
+torch.save(model.state_dict(), '/mnt/data/models/user_choice/user_choice_model_state_dict.pth')
 
 # save entire  model
-# torch.save(model, '/mnt/data/user_choice/user_choice_model_full.pth')
+torch.save(model, '/mnt/data/models/user_choice/user_choice_model_full.pth')

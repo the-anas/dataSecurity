@@ -1,7 +1,4 @@
-import torch
-from torch.utils.data import DataLoader
 from transformers import TrainerCallback, DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
-from datasets import load_dataset
 from transformers import Trainer, TrainingArguments
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -11,7 +8,7 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import wandb
 import logging
 
-EPOCHS = 2
+EPOCHS = 25
 LEARNING_RATE = 2e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -21,20 +18,22 @@ logging_dir = "./training_metrics_logs"
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Annotating Privacy Policies", name= "Test run, not tracking anything",
+project="Annotating Privacy Policies", name= "Training",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
     "Batch_size": BATCH_SIZE,
     "epochs": EPOCHS,
 },
+group="Do Not Track Model"
 )
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/do_not_track_test_run.txt",  # Log file location
+    filename=f"{logging_dir}/do_not_track_logs.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
+    filemode='w'
 )
 
 logger = logging.getLogger()
@@ -94,21 +93,32 @@ def tokenize_function(examples):
 train_tokenized_dataset = train_dataset.map(tokenize_function, batched=True)
 eval_tokenized_dataset = eval_dataset.map(tokenize_function, batched=True)
 
-# Prepare DataLoader
-small_train_dataset = train_tokenized_dataset.shuffle(seed=42).select(range(200))  # Small subset for example
-small_eval_dataset = eval_tokenized_dataset.shuffle(seed=42).select(range(100))
-
 model = DistilBertForSequenceClassification.from_pretrained('distilbert-base-uncased', num_labels=5)
 
 training_args = TrainingArguments(
-    output_dir='./results',
-    evaluation_strategy="epoch",
-    learning_rate=2e-5,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=8,
-    num_train_epochs=3,
-    weight_decay=0.01,
+    output_dir='/mnt/data/data_security_results',  # Directory where models and logs will be saved
+    eval_strategy="epoch",  # Perform evaluation at the end of each epoch
+    save_strategy="epoch",        # Save checkpoints at the end of each epoch
+    save_total_limit=1,           # Keep only the best checkpoint (based on accuracy)
+    load_best_model_at_end=True,  # Load the best model when training is complete
+    metric_for_best_model="eval_multilabel_accuracy",  # Use accuracy to determine the best model
+    greater_is_better=True,      # Higher accuracy means better model
+    learning_rate=LEARNING_RATE,
+    per_device_train_batch_size=BATCH_SIZE,
+    per_device_eval_batch_size=BATCH_SIZE,
+    num_train_epochs=EPOCHS,
+    weight_decay= 0.01,
+    logging_steps=100,
+    report_to="wandb",            # Log metrics to W&B
+    #gradient_accumulation_steps=4,       # Accumulate gradients for fewer backward passes
+    logging_strategy="epoch",            # Log metrics at intervals of steps
+    log_level="info",                    # Log level (e.g., "info" or "error")
+    log_level_replica="warning",        # Adjust logs for distributed training replicas
+    logging_dir="./logs",               # Directory for storing logs
+    fp16=True,  # Enable mixed precision
+            
 )
+
 
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
@@ -146,5 +156,5 @@ eval_results = trainer.evaluate()
 print(eval_results)
 
 # Save the model
-model.save_pretrained("./data_security_model")
-tokenizer.save_pretrained("./data_security_model")
+model.save_pretrained("/mnt/data/models/do_not_track")
+tokenizer.save_pretrained("/mnt/data/models/do_not_track")

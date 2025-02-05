@@ -1,9 +1,8 @@
 # Set up
-from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
-from sklearn.preprocessing import LabelEncoder
+from transformers import TrainerCallback, DistilBertTokenizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.metrics import accuracy_score, f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss
 import wandb
 import logging
 import os
@@ -16,7 +15,7 @@ import numpy as np
 import pandas as pd
 
 
-EPOCHS = 10
+EPOCHS =  70
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -27,7 +26,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Attempt to fix accuracy bug",
+project="Tracking DS Project", name= "70 Epochs attempt",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -133,8 +132,6 @@ class DistilBertForMultiTask(PreTrainedModel):
 
     def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None, labels_task3=None):
         outputs = self.distilbert(input_ids, attention_mask=attention_mask)
-        # pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
-
         pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
 
         logits_task1 = self.classifier_task1(pooled_output)
@@ -299,7 +296,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
 
 # save model state
-# torch.save(model.state_dict(), 'policy_change_model_state_dict.pth')
+torch.save(model.state_dict(), '/mnt/data/models/policy_change/policy_change_model_state_dict.pth')
 
 # save entire  model
-# torch.save(model, 'policy_change_model_full.pth')
+torch.save(model, '/mnt/data/models/policy_change/policy_change_model_full.pth')

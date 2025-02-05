@@ -1,7 +1,6 @@
 # Set up
 import pandas as pd
-from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
-from sklearn.preprocessing import LabelEncoder
+from transformers import TrainerCallback, DistilBertTokenizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import f1_score, hamming_loss
@@ -15,7 +14,7 @@ import ast
 import numpy as np
 
 
-EPOCHS = 10
+EPOCHS = 70
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -26,7 +25,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Fixing Accuracy bug",
+project="Tracking DS Project", name= "70 Epochs Attempt",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -38,7 +37,7 @@ group = "Data Retention"
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/data_retention_test_run.txt",  # Log file location
+    filename=f"{logging_dir}/data_retention_logs.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
     filemode='w'
@@ -132,11 +131,6 @@ class DistilBertMultiLabel(nn.Module):
     def forward(self, input_ids, attention_mask):
         # Get the hidden states from DistilBERT
         outputs = self.distilbert(input_ids=input_ids, attention_mask=attention_mask)
-        # hidden_state = outputs.last_hidden_state  # Shape: (batch_size, seq_len, hidden_size)
-
-        # Use the [CLS] token (first token in sequence) for classification
-        # cls_token_embedding = hidden_state[:, 0, :]  # Shape: (batch_size, hidden_size)
-
         pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
 
         # Compute logits for each task
@@ -144,12 +138,7 @@ class DistilBertMultiLabel(nn.Module):
         logits_task2 = self.classifier_task2(pooled_output)
         logits_task3 = self.classifier_task3(pooled_output)
 
-        # Apply sigmoid for multi-label probabilities
-        # probs_task1 = torch.sigmoid(logits_task1)
-        # probs_task2 = torch.sigmoid(logits_task2)
-        # probs_task3 = torch.sigmoid(logits_task3)
-
-        return logits_task1, logits_task2, logits_task3 #probs_task1, probs_task2, probs_task3    
+        return logits_task1, logits_task2, logits_task3     
 
 # Initialize the configuration manually if needed
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')
@@ -308,9 +297,8 @@ for epoch in range(EPOCHS):  # Number of epochs
         callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 
-# Save model after training and evaluation
 # save model state
-# torch.save(model.state_dict(), 'data_retention_model_state_dict.pth')
+torch.save(model.state_dict(), '/mnt/data/models/data_retention/data_retention_model_state_dict.pth')
 
 # save entire  model
-# torch.save(model, 'data_retention_model_full.pth')
+torch.save(model, '/mnt/data/models/data_retention/data_retention_model_full.pth')

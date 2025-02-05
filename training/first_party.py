@@ -1,20 +1,20 @@
 import pandas as pd
-from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
+from transformers import TrainerCallback, DistilBertTokenizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
-from sklearn.metrics import accuracy_score, f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss
 import wandb
 import logging
 import numpy as np
 import ast
 import os
-from transformers import DistilBertModel, PreTrainedModel, DistilBertConfig
+from transformers import DistilBertModel
 import torch.nn as nn
 from transformers import AdamW
 import torch
 
 
-EPOCHS = 15
+EPOCHS = 70
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -26,7 +26,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Fixing Accuracy Bug",
+project="Tracking DS Project", name= "70 Epochs Model",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -308,7 +308,7 @@ for epoch in range(EPOCHS):  # Number of epochs
 
 # Save model after training and evaluation
 # save model state
-# torch.save(model.state_dict(), 'first_party_model_state_dict.pth')
+torch.save(model.state_dict(), '/mnt/data/models/first_party/first_party_model_state_dict.pth')
 
 # save entire  model
-# torch.save(model, 'first_party_model_full.pth')
+torch.save(model, '/mnt/data/models/first_party/first_party_model_full.pth')

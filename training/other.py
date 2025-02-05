@@ -1,20 +1,17 @@
-from torch.utils.data import DataLoader
 from transformers import TrainerCallback, DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
-from datasets import load_dataset
 from transformers import Trainer, TrainingArguments
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from datasets import Dataset
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 import wandb
 import logging
 import os
 import ast
-from sklearn.metrics import accuracy_score, f1_score, hamming_loss
+from sklearn.metrics import f1_score, hamming_loss
 import numpy as np
 
-EPOCHS = 10
+EPOCHS = 70
 LEARNING_RATE = 5e-3   
 BATCH_SIZE = 8
 WEIGHT_DECAY = 0.01
@@ -25,7 +22,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"  # Set the directory for WandB 
 wandb.login()
 run = wandb.init(
     # Set the project where this run will be logged
-    project="Tracking DS Project", name= "train longer with higher lr 5e-3",
+    project="Tracking DS Project", name= "70 epochs attempt",
     # Track hyperparameters and run metadata
     config={
         "learning_rate": LEARNING_RATE,
@@ -38,7 +35,7 @@ run = wandb.init(
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/other_test_run.txt",  # Log file location
+    filename=f"{logging_dir}/other_logs.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
     filemode='w'
@@ -101,11 +98,11 @@ model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-unc
 training_args = TrainingArguments(
     output_dir='/mnt/data/other_results',  # Directory where models and logs will be saved
     eval_strategy="epoch",  # Perform evaluation at the end of each epoch
-    save_strategy="epoch",        # Save checkpoints at the end of each epoch
-    save_total_limit=1,           # Keep only the best checkpoint (based on accuracy)
-    load_best_model_at_end=True,  # Load the best model when training is complete
-    metric_for_best_model="eval_multilabel_accuracy",  # Use accuracy to determine the best model
-    greater_is_better=True,      # Higher accuracy means better model
+    #save_strategy="epoch",        # Save checkpoints at the end of each epoch
+    #save_total_limit=1,           # Keep only the best checkpoint (based on accuracy)
+    #load_best_model_at_end=True,  # Load the best model when training is complete
+    #metric_for_best_model="eval_multilabel_accuracy",  # Use accuracy to determine the best model
+    #greater_is_better=True,      # Higher accuracy means better model
     learning_rate=LEARNING_RATE,
     per_device_train_batch_size=BATCH_SIZE,
     per_device_eval_batch_size=BATCH_SIZE,
@@ -177,5 +174,5 @@ print(eval_results)
 
 
 # Save the model
-model.save_pretrained("/mnt/data/other_model")
-tokenizer.save_pretrained("/mnt/data/other_model")
+model.save_pretrained("/mnt/data/models/other_model")
+tokenizer.save_pretrained("/mnt/data/models/other_model")

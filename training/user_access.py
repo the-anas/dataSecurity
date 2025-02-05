@@ -1,5 +1,5 @@
 import pandas as pd
-from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
+from transformers import DistilBertTokenizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import f1_score, hamming_loss
@@ -14,7 +14,7 @@ import ast
 import os
 
 
-EPOCHS = 25
+EPOCHS = 70
 LR_AT = 5e-5
 #LR_AS = 0.1 #5e-5
 BATCH_SIZE = 16
@@ -28,7 +28,7 @@ wandb.login()
 run = wandb.init(
     # mode="offline",
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Attempt to train actual model",
+project="Tracking DS Project", name= "70 Epochs Attempt",
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LR_AT,
@@ -42,7 +42,7 @@ group = "User Access"
 
 # set up logger
 logging.basicConfig(
-    filename=f"{logging_dir}/user_access_test_run.txt",  # Log file location
+    filename=f"{logging_dir}/user_access_logs.txt",  # Log file location
     level=logging.INFO,  # Set the logging level
     format="%(asctime)s - %(message)s",  # Log format
     filemode='w'
@@ -135,18 +135,11 @@ class DistilBertForMultiTask(PreTrainedModel):
     def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None):
         outputs = self.distilbert(input_ids, attention_mask=attention_mask)
         pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
-        # pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
-
-        # Classification heads
        
         logits_task1 = self.classifier_task1(pooled_output)
         logits_task2 = self.classifier_task2(pooled_output)
 
-        # Add sigmoid for multi-label classification
-        # probs_task1 = torch.sigmoid(logits_task1)
-        # probs_task2 = torch.sigmoid(logits_task2)
-
-        return  logits_task1, logits_task2 # probs_task1, probs_task2   
+        return  logits_task1, logits_task2    
 
 # Initialize the configuration manually if needed
 config = DistilBertConfig.from_pretrained('distilbert-base-uncased')

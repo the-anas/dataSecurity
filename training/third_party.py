@@ -1,5 +1,5 @@
 import pandas as pd
-from transformers import TrainerCallback, DistilBertForSequenceClassification, DistilBertTokenizer
+from transformers import TrainerCallback, DistilBertTokenizer
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import f1_score, hamming_loss
@@ -10,9 +10,10 @@ import os
 import ast
 import torch
 from transformers import AdamW
+from transformers import DistilBertModel, PreTrainedModel, DistilBertConfig
+import torch.nn as nn
 
-
-EPOCHS = 10
+EPOCHS = 70
 LEARNING_RATE = 5e-5
 BATCH_SIZE = 16
 logging_dir = "./training_metrics_logs"
@@ -23,7 +24,7 @@ os.environ["WANDB_DIR"] = "/mnt/data/wandb_logs"
 wandb.login()
 run = wandb.init(
 # Set the project where this run will be logged
-project="Tracking DS Project", name= "Attempt to fix 0 accuracy bug", 
+project="Tracking DS Project", name= "70 epochs attempt", 
 # Track hyperparameters and run metadata
 config={
     "learning_rate": LEARNING_RATE,
@@ -111,8 +112,6 @@ train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True) # YOU 
 eval_dataloader = DataLoader(eval_dataset, batch_size=16, shuffle = True )
 
 # Adjust model for multitask case
-from transformers import DistilBertModel, PreTrainedModel, DistilBertConfig
-import torch.nn as nn
 
 class DistilBertForMultiTask(PreTrainedModel):
     def __init__(self, config, num_labels_task1, num_labels_task2, num_labels_task3):
@@ -127,7 +126,6 @@ class DistilBertForMultiTask(PreTrainedModel):
 
     def forward(self, input_ids, attention_mask=None, labels_task1=None, labels_task2=None, labels_task3=None):
         outputs = self.distilbert(input_ids, attention_mask=attention_mask)
-        # pooled_output = outputs[0][:, 0]  # Take <CLS> token hidden state
         pooled_output = self.dropout(outputs.last_hidden_state[:, 0, :]) 
 
         logits_task1 = self.classifier_task1(pooled_output)
@@ -294,7 +292,7 @@ for epoch in range(EPOCHS):  # Number of epochs
         callback.on_evaluate(metrics=metrics, epoch=epoch)
 
 # save model state
-# torch.save(model.state_dict(), '/mnt/data/models/third_party/third_party_model.pth')
+torch.save(model.state_dict(), '/mnt/data/models/third_party/third_party_model.pth')
 
 # save entire  model
-# torch.save(model, '/mnt/data/models/third_party/third_party_model_full.pth')
+torch.save(model, '/mnt/data/models/third_party/third_party_model_full.pth')
