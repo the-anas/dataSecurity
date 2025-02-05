@@ -7,7 +7,8 @@ from model_classes.policy_change_class import PolicyChange
 from model_classes.user_access_class import UserAccess
 from model_classes.user_choice_class import UserChoice
 
-filepath = None
+# set the file path here
+filepath = './20_theatlantic.com.html'
 
 # load models 
 rest_tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased') # this tokenizer applies to a bunch of different models
@@ -51,18 +52,19 @@ print("models loaded.")
 
 # dict for 1-hot encodings
 
-labels = {first_party: 0,
-            third_party: 1,
-            user_access: 2,
-            data_retention: 3,
-            data_security: 4,
-            'International and Specific Audiences': 5,
-            'Do Not Track': 6,
-            'Policy Change': 7,
-            'User Choice/Control': 8,
-            'Introductory/Generic': 9,
-            'Practice not covered': 10,
-            'Privacy contact information': 11}
+labels = {
+    0: (first_party, rest_tokenizer),
+    1: (third_party, rest_tokenizer),
+    2: (user_access, rest_tokenizer),
+    3: (data_retention, rest_tokenizer),
+    4: (data_security, data_security_tokenizer),
+    5: (inter_audiences, inter_audiences_tokenizer),
+    6: 'Do Not Track',
+    7: (policy_change, rest_tokenizer),
+    8: (user_choice, rest_tokenizer),
+    9: 'Introductory/Generic',
+    10: (other_model, rest_tokenizer)
+}
 
 
 def classify_text(model, tokenizer, text):
@@ -74,7 +76,7 @@ def classify_text(model, tokenizer, text):
     logits = outputs.logits
     if model == first_model:
         probs = torch.sigmoid(logits)
-        predicted_classes = (probs > 0.5).astype(int)
+        predicted_classes = (probs > 0.5).int()
     else:    
         predicted_classes = (logits > 0.3).int()  # Get predicted label
 
@@ -92,12 +94,12 @@ elements = content.split("|||")
 
 for sent in elements:
     classification = classify_text(first_model, first_model_tokenizer, sent)
-    print(classification)
-    for i, clas in enumerate(classification):
+    for i, clas in enumerate(classification.tolist()[0]):
         if clas == 1:
-            print(i)
+            if i == 6 or i == 9:
+                continue
+            pred = classify_text(labels[i][0], labels[i][1], sent)
+            print(pred)
 
     break 
 
-# WRITE FIRST AND THEN GO BACK AND FINISH THIS
-# ADD AN EXAMPLE POLICY TO TEST THE MODEL 
