@@ -1,0 +1,320 @@
+2025-02-04 13:31:57,364 - Epoch: 1.0, Eval Loss: 0.3904331922531128, 
+            Exact Match: 0.0008795074758135445, Multilabel Accuracy: 0.8567135737320434, F1 Macro: 0.0, F1 Micro: None, Hamming Loss: 0.14328642626795662, 
+            Precision Macro: 0.0, Recall Macro: 0.0, Jaccard Macro: 0.0, Precision Micro: 0.0, 
+            Recall Micro: 0.0, Jaccard Micro: 0.0
+2025-02-04 13:32:12,377 - Epoch: 2.0, Eval Loss: 0.35104602575302124, 
+            Exact Match: 0.003518029903254178, Multilabel Accuracy: 0.8570800351802991, F1 Macro: 0.0018076644974692696, F1 Micro: None, Hamming Loss: 0.14291996481970096, 
+            Precision Macro: 0.08333333333333333, Recall Macro: 0.0009137426900584795, Jaccard Macro: 0.0009137426900584795, Precision Micro: 1.0, 
+            Recall Micro: 0.0025575447570332483, Jaccard Micro: 0.0025575447570332483
+2025-02-04 13:32:27,386 - Epoch: 3.0, Eval Loss: 0.30312490463256836, 
+            Exact Match: 0.21899736147757257, Multilabel Accuracy: 0.8910876575784228, F1 Macro: 0.15188108525805613, F1 Micro: None, Hamming Loss: 0.10891234242157725, 
+            Precision Macro: 0.298423545302471, Recall Macro: 0.12343922369757859, Jaccard Macro: 0.11194853393800523, Precision Micro: 0.8484398216939079, 
+            Recall Micro: 0.2920716112531969, Jaccard Micro: 0.27758872143898883
+2025-02-04 13:32:42,393 - Epoch: 4.0, Eval Loss: 0.2605932652950287, 
+            Exact Match: 0.3562005277044855, Multilabel Accuracy: 0.9123424215772501, F1 Macro: 0.3430901433999991, F1 Micro: None, Hamming Loss: 0.08765757842274993, 
+            Precision Macro: 0.6044931525074995, Recall Macro: 0.2871726878947456, Jaccard Macro: 0.2663992047781202, Precision Micro: 0.8746298124383021, 
+            Recall Micro: 0.45319693094629154, Jaccard Micro: 0.425552353506244
+2025-02-04 13:32:57,424 - Epoch: 5.0, Eval Loss: 0.23216648399829865, 
+            Exact Match: 0.39313984168865435, Multilabel Accuracy: 0.9176927587217825, F1 Macro: 0.395721430966045, F1 Micro: None, Hamming Loss: 0.08230724127821754, 
+            Precision Macro: 0.779019873610824, Recall Macro: 0.32242203312020173, Jaccard Macro: 0.3040597398288468, Precision Micro: 0.8909774436090225, 
+            Recall Micro: 0.48491048593350383, Jaccard Micro: 0.45774987928536937
+2025-02-04 13:33:12,485 - Epoch: 6.0, Eval Loss: 0.21297428011894226, 
+            Exact Match: 0.4291996481970097, Multilabel Accuracy: 0.9240691879214307, F1 Macro: 0.48159899335976464, F1 Micro: None, Hamming Loss: 0.07593081207856933, 
+            Precision Macro: 0.7502483502102902, Recall Macro: 0.39678702450810516, Jaccard Macro: 0.3690043050842839, Precision Micro: 0.8678943154523618, 
+            Recall Micro: 0.5544757033248082, Jaccard Micro: 0.5113207547169811
+2025-02-04 13:33:27,571 - Epoch: 7.0, Eval Loss: 0.20201721787452698, 
+            Exact Match: 0.45910290237467016, Multilabel Accuracy: 0.9285400175901495, F1 Macro: 0.5422665797001257, F1 Micro: None, Hamming Loss: 0.07145998240985048, 
+            Precision Macro: 0.73624452843386, Recall Macro: 0.4554477000556513, Jaccard Macro: 0.4246937819672371, Precision Micro: 0.8810264385692068, 
+            Recall Micro: 0.579539641943734, Jaccard Micro: 0.5374762808349146
+2025-02-04 13:33:42,664 - Epoch: 8.0, Eval Loss: 0.19693712890148163, 
+            Exact Match: 0.46174142480211083, Multilabel Accuracy: 0.9289797713280563, F1 Macro: 0.5308945519123617, F1 Micro: None, Hamming Loss: 0.07102022867194371, 
+            Precision Macro: 0.7570230355428106, Recall Macro: 0.4468656162796915, Jaccard Macro: 0.41828246764317534, Precision Micro: 0.8833592534992224, 
+            Recall Micro: 0.5810741687979539, Jaccard Micro: 0.539667458432304
+2025-02-04 13:33:57,742 - Epoch: 9.0, Eval Loss: 0.18554793298244476, 
+            Exact Match: 0.484608619173263, Multilabel Accuracy: 0.9326443858106127, F1 Macro: 0.5981813307467801, F1 Micro: None, Hamming Loss: 0.06735561418938728, 
+            Precision Macro: 0.8078766453748459, Recall Macro: 0.5161378252750223, Jaccard Macro: 0.4744881394021409, Precision Micro: 0.8572413793103448, 
+            Recall Micro: 0.6358056265984655, Jaccard Micro: 0.5749306197964847
+2025-02-04 13:34:12,813 - Epoch: 10.0, Eval Loss: 0.18670551478862762, 
+            Exact Match: 0.46262093227792433, Multilabel Accuracy: 0.931105247727939, F1 Macro: 0.583288903974485, F1 Micro: None, Hamming Loss: 0.06889475227206097, 
+            Precision Macro: 0.8198123898850268, Recall Macro: 0.4931851989516103, Jaccard Macro: 0.462325809092556, Precision Micro: 0.8900845503458877, 
+            Recall Micro: 0.5923273657289002, Jaccard Micro: 0.551954242135367
+2025-02-04 13:34:27,898 - Epoch: 11.0, Eval Loss: 0.17966420948505402, 
+            Exact Match: 0.4969217238346526, Multilabel Accuracy: 0.9362357080035181, F1 Macro: 0.6431338790243859, F1 Micro: None, Hamming Loss: 0.06376429199648197, 
+            Precision Macro: 0.799905253431557, Recall Macro: 0.5637130344615436, Jaccard Macro: 0.5130155016597053, Precision Micro: 0.8414096916299559, 
+            Recall Micro: 0.6838874680306906, Jaccard Micro: 0.6057997281377435
+2025-02-04 13:34:45,586 - Epoch: 12.0, Eval Loss: 0.17959657311439514, 
+            Exact Match: 0.49340369393139843, Multilabel Accuracy: 0.9350630313691, F1 Macro: 0.6491662163491437, F1 Micro: None, Hamming Loss: 0.06493696863090002, 
+            Precision Macro: 0.7737278461216796, Recall Macro: 0.5777030723703237, Jaccard Macro: 0.5203764842411603, Precision Micro: 0.8424087123638693, 
+            Recall Micro: 0.6726342710997443, Jaccard Micro: 0.5974557019536574
+2025-02-04 13:35:00,660 - Epoch: 13.0, Eval Loss: 0.18013517558574677, 
+            Exact Match: 0.49428320140721194, Multilabel Accuracy: 0.9346965699208444, F1 Macro: 0.6390107948378919, F1 Micro: None, Hamming Loss: 0.06530343007915568, 
+            Precision Macro: 0.7802701347295894, Recall Macro: 0.5626670277716523, Jaccard Macro: 0.5131598771848712, Precision Micro: 0.8454545454545455, 
+            Recall Micro: 0.6659846547314578, Jaccard Micro: 0.5937072503419972
+2025-02-04 13:35:15,751 - Epoch: 14.0, Eval Loss: 0.1828613579273224, 
+            Exact Match: 0.4951627088830255, Multilabel Accuracy: 0.9354294928173557, F1 Macro: 0.6475700414079489, F1 Micro: None, Hamming Loss: 0.06457050718264438, 
+            Precision Macro: 0.7905992382896166, Recall Macro: 0.5668769438024696, Jaccard Macro: 0.5179416780470183, Precision Micro: 0.8424744897959183, 
+            Recall Micro: 0.6757033248081842, Jaccard Micro: 0.5999091734786558
+2025-02-04 13:35:30,832 - Epoch: 15.0, Eval Loss: 0.18429069221019745, 
+            Exact Match: 0.49076517150395776, Multilabel Accuracy: 0.9363822925828202, F1 Macro: 0.6638899821901125, F1 Micro: None, Hamming Loss: 0.06361770741717972, 
+            Precision Macro: 0.8698779805785583, Recall Macro: 0.5789826064303955, Jaccard Macro: 0.5273814452681821, Precision Micro: 0.8508715300193673, 
+            Recall Micro: 0.6741687979539642, Jaccard Micro: 0.6029277218664227
+2025-02-04 13:35:45,920 - Epoch: 16.0, Eval Loss: 0.1877465546131134, 
+            Exact Match: 0.4837291116974494, Multilabel Accuracy: 0.9344034007622398, F1 Macro: 0.6799885723167939, F1 Micro: None, Hamming Loss: 0.06559659923776019, 
+            Precision Macro: 0.8554849169614992, Recall Macro: 0.5957671794442567, Jaccard Macro: 0.5378479480086381, Precision Micro: 0.8393085787451985, 
+            Recall Micro: 0.6705882352941176, Jaccard Micro: 0.5942883046237534
+2025-02-04 13:36:00,996 - Epoch: 17.0, Eval Loss: 0.18856103718280792, 
+            Exact Match: 0.5030782761653474, Multilabel Accuracy: 0.9365288771621225, F1 Macro: 0.7251452213778261, F1 Micro: None, Hamming Loss: 0.06347112283787745, 
+            Precision Macro: 0.8540755842223599, Recall Macro: 0.6436453352824049, Jaccard Macro: 0.5823203724043002, Precision Micro: 0.8384089496581728, 
+            Recall Micro: 0.6900255754475704, Jaccard Micro: 0.6090293453724605
+2025-02-04 13:36:16,066 - Epoch: 18.0, Eval Loss: 0.1906498372554779, 
+            Exact Match: 0.4969217238346526, Multilabel Accuracy: 0.9360158311345647, F1 Macro: 0.728386520102931, F1 Micro: None, Hamming Loss: 0.06398416886543536, 
+            Precision Macro: 0.8423398621281025, Recall Macro: 0.6553364363840196, Jaccard Macro: 0.587847768231099, Precision Micro: 0.8262967430639324, 
+            Recall Micro: 0.7007672634271099, Jaccard Micro: 0.6107891217119928
+2025-02-04 13:36:31,139 - Epoch: 19.0, Eval Loss: 0.19083154201507568, 
+            Exact Match: 0.5004397537379067, Multilabel Accuracy: 0.9366021694517737, F1 Macro: 0.739129060570768, F1 Micro: None, Hamming Loss: 0.06339783054822633, 
+            Precision Macro: 0.8406154628526838, Recall Macro: 0.6675715435704587, Jaccard Macro: 0.5993407923713907, Precision Micro: 0.8247914183551848, 
+            Recall Micro: 0.7079283887468031, Jaccard Micro: 0.6153846153846154
+2025-02-04 13:36:46,201 - Epoch: 20.0, Eval Loss: 0.19347304105758667, 
+            Exact Match: 0.4995602462620932, Multilabel Accuracy: 0.9371152154793315, F1 Macro: 0.7347437437558093, F1 Micro: None, Hamming Loss: 0.06288478452066842, 
+            Precision Macro: 0.8520163035088779, Recall Macro: 0.6537636915950559, Jaccard Macro: 0.5935219268215944, Precision Micro: 0.8387893761581223, 
+            Recall Micro: 0.6946291560102302, Jaccard Micro: 0.6128158844765343
+2025-02-04 13:37:01,267 - Epoch: 21.0, Eval Loss: 0.19695766270160675, 
+            Exact Match: 0.5013192612137203, Multilabel Accuracy: 0.9368953386103782, F1 Macro: 0.7345067397613216, F1 Micro: None, Hamming Loss: 0.06310466138962181, 
+            Precision Macro: 0.8586993659401867, Recall Macro: 0.6505343851263593, Jaccard Macro: 0.5954944322456116, Precision Micro: 0.8444584382871536, 
+            Recall Micro: 0.6859335038363171, Jaccard Micro: 0.6089918256130791
+2025-02-04 13:37:16,326 - Epoch: 22.0, Eval Loss: 0.19550257921218872, 
+            Exact Match: 0.49340369393139843, Multilabel Accuracy: 0.9351363236587511, F1 Macro: 0.7443748363827133, F1 Micro: None, Hamming Loss: 0.0648636763412489, 
+            Precision Macro: 0.8229583421411419, Recall Macro: 0.6836246975637348, Jaccard Macro: 0.6079313233626318, Precision Micro: 0.8125, 
+            Recall Micro: 0.7115089514066496, Jaccard Micro: 0.6111599297012302
+2025-02-04 13:37:31,388 - Epoch: 23.0, Eval Loss: 0.20018944144248962, 
+            Exact Match: 0.4969217238346526, Multilabel Accuracy: 0.9366754617414248, F1 Macro: 0.7446142752070689, F1 Micro: None, Hamming Loss: 0.0633245382585752, 
+            Precision Macro: 0.844241991677588, Recall Macro: 0.6749015540687845, Jaccard Macro: 0.606325075379261, Precision Micro: 0.8233550681683461, 
+            Recall Micro: 0.7104859335038363, Jaccard Micro: 0.6165113182423435
+2025-02-04 13:37:48,980 - Epoch: 24.0, Eval Loss: 0.2101859152317047, 
+            Exact Match: 0.5101143359718557, Multilabel Accuracy: 0.9379214306654939, F1 Macro: 0.7383612344956622, F1 Micro: None, Hamming Loss: 0.06207856933450601, 
+            Precision Macro: 0.8615536098013359, Recall Macro: 0.6614936760315123, Jaccard Macro: 0.6066945968170527, Precision Micro: 0.8560411311053985, 
+            Recall Micro: 0.6813299232736573, Jaccard Micro: 0.6112895823772373
+2025-02-04 13:38:04,034 - Epoch: 25.0, Eval Loss: 0.21069291234016418, 
+            Exact Match: 0.5065963060686016, Multilabel Accuracy: 0.9378481383758429, F1 Macro: 0.7406420250082325, F1 Micro: None, Hamming Loss: 0.06215186162415714, 
+            Precision Macro: 0.8628802213321839, Recall Macro: 0.6581706758703265, Jaccard Macro: 0.6028539425709066, Precision Micro: 0.8457214241099313, 
+            Recall Micro: 0.6925831202046036, Jaccard Micro: 0.6148955495004541
+2025-02-04 13:38:19,123 - Epoch: 26.0, Eval Loss: 0.21557007730007172, 
+            Exact Match: 0.5021987686895338, Multilabel Accuracy: 0.9379214306654939, F1 Macro: 0.7381406504416071, F1 Micro: None, Hamming Loss: 0.06207856933450601, 
+            Precision Macro: 0.8518881087650745, Recall Macro: 0.6626373083548089, Jaccard Macro: 0.6024548434660093, Precision Micro: 0.8493064312736444, 
+            Recall Micro: 0.689002557544757, Jaccard Micro: 0.613947128532361
+2025-02-04 13:38:34,207 - Epoch: 27.0, Eval Loss: 0.20817869901657104, 
+            Exact Match: 0.51363236587511, Multilabel Accuracy: 0.9389475227206098, F1 Macro: 0.7585454089839541, F1 Micro: None, Hamming Loss: 0.061052477279390206, 
+            Precision Macro: 0.8402174173460059, Recall Macro: 0.6964826844015758, Jaccard Macro: 0.6278953411200715, Precision Micro: 0.8363309352517986, 
+            Recall Micro: 0.7135549872122762, Jaccard Micro: 0.6261220825852782
+2025-02-04 13:38:49,280 - Epoch: 28.0, Eval Loss: 0.21362878382205963, 
+            Exact Match: 0.5101143359718557, Multilabel Accuracy: 0.9379214306654939, F1 Macro: 0.7542202383767057, F1 Micro: None, Hamming Loss: 0.06207856933450601, 
+            Precision Macro: 0.8515709426971886, Recall Macro: 0.6844624131407958, Jaccard Macro: 0.6229141719047175, Precision Micro: 0.8353510895883777, 
+            Recall Micro: 0.7058823529411765, Jaccard Micro: 0.6196677144140099
+2025-02-04 13:39:04,355 - Epoch: 29.0, Eval Loss: 0.2152685672044754, 
+            Exact Match: 0.5162708883025505, Multilabel Accuracy: 0.9395338610378188, F1 Macro: 0.7566923967582356, F1 Micro: None, Hamming Loss: 0.06046613896218118, 
+            Precision Macro: 0.8560071879993751, Recall Macro: 0.6839646829603994, Jaccard Macro: 0.6248966537443065, Precision Micro: 0.8496287128712872, 
+            Recall Micro: 0.7023017902813299, Jaccard Micro: 0.6246587807097361
+2025-02-04 13:39:19,428 - Epoch: 30.0, Eval Loss: 0.2159695029258728, 
+            Exact Match: 0.5048372911169745, Multilabel Accuracy: 0.9379947229551451, F1 Macro: 0.7529389982097675, F1 Micro: None, Hamming Loss: 0.06200527704485488, 
+            Precision Macro: 0.8443413634195914, Recall Macro: 0.6859028863165335, Jaccard Macro: 0.6199001778819494, Precision Micro: 0.8358570563294972, 
+            Recall Micro: 0.7058823529411765, Jaccard Micro: 0.6199460916442049
+2025-02-04 13:39:34,514 - Epoch: 31.0, Eval Loss: 0.21524713933467865, 
+            Exact Match: 0.5057167985927881, Multilabel Accuracy: 0.9366021694517737, F1 Macro: 0.7593536452279093, F1 Micro: None, Hamming Loss: 0.06339783054822633, 
+            Precision Macro: 0.8139282158851383, Recall Macro: 0.7155637147850457, Jaccard Macro: 0.627101723658967, Precision Micro: 0.807909604519774, 
+            Recall Micro: 0.731457800511509, Jaccard Micro: 0.6230936819172114
+2025-02-04 13:39:49,584 - Epoch: 32.0, Eval Loss: 0.2246253341436386, 
+            Exact Match: 0.5048372911169745, Multilabel Accuracy: 0.9374083846379361, F1 Macro: 0.7461606852233533, F1 Micro: None, Hamming Loss: 0.06259161536206391, 
+            Precision Macro: 0.845521149061602, Recall Macro: 0.6754284320463788, Jaccard Macro: 0.6133809354019685, Precision Micro: 0.8404452690166976, 
+            Recall Micro: 0.6951406649616368, Jaccard Micro: 0.614098508811568
+2025-02-04 13:40:04,640 - Epoch: 33.0, Eval Loss: 0.2232089340686798, 
+            Exact Match: 0.5057167985927881, Multilabel Accuracy: 0.9379214306654939, F1 Macro: 0.7547445921469804, F1 Micro: None, Hamming Loss: 0.06207856933450601, 
+            Precision Macro: 0.8364856106694846, Recall Macro: 0.6974568936682446, Jaccard Macro: 0.626590664889826, Precision Micro: 0.8309438470728794, 
+            Recall Micro: 0.7115089514066496, Jaccard Micro: 0.6215370866845398
+2025-02-04 13:40:19,710 - Epoch: 34.0, Eval Loss: 0.23234064877033234, 
+            Exact Match: 0.503957783641161, Multilabel Accuracy: 0.9373350923482849, F1 Macro: 0.747728710180093, F1 Micro: None, Hamming Loss: 0.06266490765171503, 
+            Precision Macro: 0.8475886288102488, Recall Macro: 0.6853288943962926, Jaccard Macro: 0.6203574449581936, Precision Micro: 0.8374233128834356, 
+            Recall Micro: 0.6982097186700768, Jaccard Micro: 0.6148648648648649
+2025-02-04 13:40:34,780 - Epoch: 35.0, Eval Loss: 0.22636181116104126, 
+            Exact Match: 0.5092348284960422, Multilabel Accuracy: 0.9380680152447962, F1 Macro: 0.7583609642833872, F1 Micro: None, Hamming Loss: 0.06193198475520375, 
+            Precision Macro: 0.8336685322381009, Recall Macro: 0.7040923777986648, Jaccard Macro: 0.6305041521226782, Precision Micro: 0.8268551236749117, 
+            Recall Micro: 0.718158567774936, Jaccard Micro: 0.6242774566473989
+2025-02-04 13:40:52,364 - Epoch: 36.0, Eval Loss: 0.22617237269878387, 
+            Exact Match: 0.5030782761653474, Multilabel Accuracy: 0.9372618000586338, F1 Macro: 0.758667221141394, F1 Micro: None, Hamming Loss: 0.06273819994136617, 
+            Precision Macro: 0.8304788598656508, Recall Macro: 0.7040575299311804, Jaccard Macro: 0.6300869833430388, Precision Micro: 0.8234255444379046, 
+            Recall Micro: 0.7156010230179028, Jaccard Micro: 0.6203991130820399
+2025-02-04 13:41:07,443 - Epoch: 37.0, Eval Loss: 0.2367887645959854, 
+            Exact Match: 0.5013192612137203, Multilabel Accuracy: 0.9373350923482849, F1 Macro: 0.7509820919169332, F1 Micro: None, Hamming Loss: 0.06266490765171503, 
+            Precision Macro: 0.8402601495720483, Recall Macro: 0.6925675464005273, Jaccard Macro: 0.6233294873897708, Precision Micro: 0.8345498783454988, 
+            Recall Micro: 0.7017902813299233, Jaccard Micro: 0.6160754378087113
+2025-02-04 13:41:22,523 - Epoch: 38.0, Eval Loss: 0.23303104937076569, 
+            Exact Match: 0.5065963060686016, Multilabel Accuracy: 0.9375549692172384, F1 Macro: 0.7562962953777802, F1 Micro: None, Hamming Loss: 0.06244503078276165, 
+            Precision Macro: 0.8271318837833398, Recall Macro: 0.7041233269350623, Jaccard Macro: 0.6288661044905025, Precision Micro: 0.8296473401075911, 
+            Recall Micro: 0.7099744245524297, Jaccard Micro: 0.6196428571428572
+2025-02-04 13:41:37,621 - Epoch: 39.0, Eval Loss: 0.2350301742553711, 
+            Exact Match: 0.5021987686895338, Multilabel Accuracy: 0.9369686309000294, F1 Macro: 0.751824287266354, F1 Micro: None, Hamming Loss: 0.06303136909997069, 
+            Precision Macro: 0.8303005807755701, Recall Macro: 0.6952029005744141, Jaccard Macro: 0.6230785654989589, Precision Micro: 0.8288288288288288, 
+            Recall Micro: 0.7058823529411765, Jaccard Micro: 0.6160714285714286
+2025-02-04 13:41:52,694 - Epoch: 40.0, Eval Loss: 0.23481212556362152, 
+            Exact Match: 0.49868073878627966, Multilabel Accuracy: 0.9371152154793315, F1 Macro: 0.7610629314095645, F1 Micro: None, Hamming Loss: 0.06288478452066842, 
+            Precision Macro: 0.8388789416480721, Recall Macro: 0.7044297361173473, Jaccard Macro: 0.6329344512748103, Precision Micro: 0.8232174425456689, 
+            Recall Micro: 0.7145780051150895, Jaccard Micro: 0.6195121951219512
+2025-02-04 13:42:07,760 - Epoch: 41.0, Eval Loss: 0.23868919909000397, 
+            Exact Match: 0.5118733509234829, Multilabel Accuracy: 0.9389475227206098, F1 Macro: 0.7590997688666047, F1 Micro: None, Hamming Loss: 0.061052477279390206, 
+            Precision Macro: 0.8569678195502034, Recall Macro: 0.690991792364689, Jaccard Macro: 0.6318736302770399, Precision Micro: 0.8433292533659731, 
+            Recall Micro: 0.7048593350383632, Jaccard Micro: 0.6232473993668024
+2025-02-04 13:42:22,824 - Epoch: 42.0, Eval Loss: 0.23718208074569702, 
+            Exact Match: 0.5109938434476693, Multilabel Accuracy: 0.9385810612723542, F1 Macro: 0.760605119157923, F1 Micro: None, Hamming Loss: 0.06141893872764585, 
+            Precision Macro: 0.8348812904273429, Recall Macro: 0.7065877208813207, Jaccard Macro: 0.6330285173853301, Precision Micro: 0.8271821909783246, 
+            Recall Micro: 0.7222506393861893, Jaccard Micro: 0.6275555555555555
+2025-02-04 13:42:37,885 - Epoch: 43.0, Eval Loss: 0.23883196711540222, 
+            Exact Match: 0.5057167985927881, Multilabel Accuracy: 0.9380680152447962, F1 Macro: 0.7598982085239651, F1 Micro: None, Hamming Loss: 0.06193198475520375, 
+            Precision Macro: 0.8367122998860029, Recall Macro: 0.701395816783259, Jaccard Macro: 0.6309901168910742, Precision Micro: 0.8339350180505415, 
+            Recall Micro: 0.7089514066496164, Jaccard Micro: 0.6212460779919319
+2025-02-04 13:42:52,934 - Epoch: 44.0, Eval Loss: 0.2468978613615036, 
+            Exact Match: 0.5057167985927881, Multilabel Accuracy: 0.9382145998240985, F1 Macro: 0.757218780751015, F1 Micro: None, Hamming Loss: 0.06178540017590149, 
+            Precision Macro: 0.8458642306292695, Recall Macro: 0.6948179688134607, Jaccard Macro: 0.6296728823502011, Precision Micro: 0.8415233415233415, 
+            Recall Micro: 0.7007672634271099, Jaccard Micro: 0.6190691369182105
+2025-02-04 13:43:07,990 - Epoch: 45.0, Eval Loss: 0.24339886009693146, 
+            Exact Match: 0.5030782761653474, Multilabel Accuracy: 0.9375549692172384, F1 Macro: 0.756491559051239, F1 Micro: None, Hamming Loss: 0.06244503078276165, 
+            Precision Macro: 0.843952568845158, Recall Macro: 0.69499001084559, Jaccard Macro: 0.6282062071390554, Precision Micro: 0.8336358136721113, 
+            Recall Micro: 0.7048593350383632, Jaccard Micro: 0.6179372197309417
+2025-02-04 13:43:23,047 - Epoch: 46.0, Eval Loss: 0.24141022562980652, 
+            Exact Match: 0.5057167985927881, Multilabel Accuracy: 0.9380680152447962, F1 Macro: 0.7555587142042133, F1 Micro: None, Hamming Loss: 0.06193198475520375, 
+            Precision Macro: 0.8382496824669445, Recall Macro: 0.6942516484943558, Jaccard Macro: 0.6226039367008921, Precision Micro: 0.8284023668639053, 
+            Recall Micro: 0.7161125319693095, Jaccard Micro: 0.623608017817372
+2025-02-04 13:43:38,096 - Epoch: 47.0, Eval Loss: 0.24380184710025787, 
+            Exact Match: 0.5083553210202286, Multilabel Accuracy: 0.9380680152447962, F1 Macro: 0.7596173604253659, F1 Micro: None, Hamming Loss: 0.06193198475520375, 
+            Precision Macro: 0.8378219649860488, Recall Macro: 0.7028087757153894, Jaccard Macro: 0.6324889358770787, Precision Micro: 0.8327338129496403, 
+            Recall Micro: 0.7104859335038363, Jaccard Micro: 0.6217547000895255
+2025-02-04 13:43:55,417 - Epoch: 48.0, Eval Loss: 0.24556219577789307, 
+            Exact Match: 0.5065963060686016, Multilabel Accuracy: 0.9380680152447962, F1 Macro: 0.7569512704983209, F1 Micro: None, Hamming Loss: 0.06193198475520375, 
+            Precision Macro: 0.8379167490003052, Recall Macro: 0.6981400557733147, Jaccard Macro: 0.6291027639310774, Precision Micro: 0.8351449275362319, 
+            Recall Micro: 0.7074168797953965, Jaccard Micro: 0.6207360861759426
+2025-02-04 13:44:10,469 - Epoch: 49.0, Eval Loss: 0.247836634516716, 
+            Exact Match: 0.5021987686895338, Multilabel Accuracy: 0.9372618000586338, F1 Macro: 0.7544918046632142, F1 Micro: None, Hamming Loss: 0.06273819994136617, 
+            Precision Macro: 0.8358256118665132, Recall Macro: 0.6962062604317035, Jaccard Macro: 0.6252686958421478, Precision Micro: 0.8284518828451883, 
+            Recall Micro: 0.7089514066496164, Jaccard Micro: 0.6181980374665478
+2025-02-04 13:44:25,506 - Epoch: 50.0, Eval Loss: 0.24705246090888977, 
+            Exact Match: 0.5057167985927881, Multilabel Accuracy: 0.9382878921137496, F1 Macro: 0.7553433359166818, F1 Micro: None, Hamming Loss: 0.06171210788625037, 
+            Precision Macro: 0.83822114742587, Recall Macro: 0.6927426517782895, Jaccard Macro: 0.623019471342406, Precision Micro: 0.8354430379746836, 
+            Recall Micro: 0.7089514066496164, Jaccard Micro: 0.6220825852782765
+2025-02-04 13:44:40,544 - Epoch: 51.0, Eval Loss: 0.2521725296974182, 
+            Exact Match: 0.5074758135444152, Multilabel Accuracy: 0.9388742304309586, F1 Macro: 0.7569369737272478, F1 Micro: None, Hamming Loss: 0.06112576956904134, 
+            Precision Macro: 0.8445935425865757, Recall Macro: 0.6942812718150574, Jaccard Macro: 0.6294904144659895, Precision Micro: 0.8440761203192142, 
+            Recall Micro: 0.7033248081841432, Jaccard Micro: 0.6224535989135356
+2025-02-04 13:44:55,604 - Epoch: 52.0, Eval Loss: 0.2512221038341522, 
+            Exact Match: 0.5101143359718557, Multilabel Accuracy: 0.9388742304309586, F1 Macro: 0.7595056593121137, F1 Micro: None, Hamming Loss: 0.06112576956904134, 
+            Precision Macro: 0.840973291565095, Recall Macro: 0.7017422611119882, Jaccard Macro: 0.6327237466516767, Precision Micro: 0.8382619191309596, 
+            Recall Micro: 0.7104859335038363, Jaccard Micro: 0.6248313090418354
+2025-02-04 13:45:10,637 - Epoch: 53.0, Eval Loss: 0.2543732225894928, 
+            Exact Match: 0.5030782761653474, Multilabel Accuracy: 0.9374083846379361, F1 Macro: 0.756693538365087, F1 Micro: None, Hamming Loss: 0.06259161536206391, 
+            Precision Macro: 0.8401017977122692, Recall Macro: 0.6971716819679451, Jaccard Macro: 0.6294251094097479, Precision Micro: 0.8342440801457195, 
+            Recall Micro: 0.7028132992327366, Jaccard Micro: 0.6166965888689407
+2025-02-04 13:45:25,669 - Epoch: 54.0, Eval Loss: 0.2526932954788208, 
+            Exact Match: 0.5127528583992964, Multilabel Accuracy: 0.9386543535620053, F1 Macro: 0.7608523593915558, F1 Micro: None, Hamming Loss: 0.06134564643799472, 
+            Precision Macro: 0.8390450735861238, Recall Macro: 0.703279919267065, Jaccard Macro: 0.6340430728294417, Precision Micro: 0.8367469879518072, 
+            Recall Micro: 0.7104859335038363, Jaccard Micro: 0.623989218328841
+2025-02-04 13:45:40,707 - Epoch: 55.0, Eval Loss: 0.2541026175022125, 
+            Exact Match: 0.5101143359718557, Multilabel Accuracy: 0.9383611844034008, F1 Macro: 0.75820663883672, F1 Micro: None, Hamming Loss: 0.061638815596599235, 
+            Precision Macro: 0.8387384740274216, Recall Macro: 0.6999620051983472, Jaccard Macro: 0.6308603610668909, Precision Micro: 0.8347355769230769, 
+            Recall Micro: 0.7104859335038363, Jaccard Micro: 0.6228699551569506
+2025-02-04 13:45:55,747 - Epoch: 56.0, Eval Loss: 0.25165271759033203, 
+            Exact Match: 0.5074758135444152, Multilabel Accuracy: 0.9378481383758429, F1 Macro: 0.7599732121111461, F1 Micro: None, Hamming Loss: 0.06215186162415714, 
+            Precision Macro: 0.8315506594323862, Recall Macro: 0.7066979946288897, Jaccard Macro: 0.6320808835900262, Precision Micro: 0.8265486725663717, 
+            Recall Micro: 0.7166240409207161, Jaccard Micro: 0.6229435304579813
+2025-02-04 13:46:10,800 - Epoch: 57.0, Eval Loss: 0.2542695701122284, 
+            Exact Match: 0.5092348284960422, Multilabel Accuracy: 0.9382145998240985, F1 Macro: 0.7604996058446428, F1 Micro: None, Hamming Loss: 0.06178540017590149, 
+            Precision Macro: 0.8317792102221309, Recall Macro: 0.7070089622120143, Jaccard Macro: 0.6330040090794039, Precision Micro: 0.830952380952381, 
+            Recall Micro: 0.7140664961636829, Jaccard Micro: 0.623492630638678
+2025-02-04 13:46:25,835 - Epoch: 58.0, Eval Loss: 0.25354433059692383, 
+            Exact Match: 0.5092348284960422, Multilabel Accuracy: 0.938507768982703, F1 Macro: 0.7622370712625618, F1 Micro: None, Hamming Loss: 0.06149223101729698, 
+            Precision Macro: 0.8330089623763567, Recall Macro: 0.7096571844756182, Jaccard Macro: 0.6347790623282473, Precision Micro: 0.8270808909730364, 
+            Recall Micro: 0.7217391304347827, Jaccard Micro: 0.6271111111111111
+2025-02-04 13:46:40,885 - Epoch: 59.0, Eval Loss: 0.25361037254333496, 
+            Exact Match: 0.503957783641161, Multilabel Accuracy: 0.9377748460861918, F1 Macro: 0.7615789370283056, F1 Micro: None, Hamming Loss: 0.06222515391380827, 
+            Precision Macro: 0.8395836674336175, Recall Macro: 0.7043447813894576, Jaccard Macro: 0.6337407609171858, Precision Micro: 0.8256772673733804, 
+            Recall Micro: 0.7171355498721228, Jaccard Micro: 0.6228342958685029
+2025-02-04 13:46:58,402 - Epoch: 60.0, Eval Loss: 0.25888869166374207, 
+            Exact Match: 0.5127528583992964, Multilabel Accuracy: 0.9383611844034008, F1 Macro: 0.7607790038096313, F1 Micro: None, Hamming Loss: 0.061638815596599235, 
+            Precision Macro: 0.8402328887727376, Recall Macro: 0.7038427357752846, Jaccard Macro: 0.6335836387342136, Precision Micro: 0.8323389021479713, 
+            Recall Micro: 0.7135549872122762, Jaccard Micro: 0.6238819320214669
+2025-02-04 13:47:13,519 - Epoch: 61.0, Eval Loss: 0.2571415305137634, 
+            Exact Match: 0.5101143359718557, Multilabel Accuracy: 0.9384344766930519, F1 Macro: 0.7605816024389788, F1 Micro: None, Hamming Loss: 0.06156552330694811, 
+            Precision Macro: 0.8388095200000315, Recall Macro: 0.7031442193643355, Jaccard Macro: 0.6334799257590146, Precision Micro: 0.8312537136066548, 
+            Recall Micro: 0.7156010230179028, Jaccard Micro: 0.6248325145154087
+2025-02-04 13:47:28,591 - Epoch: 62.0, Eval Loss: 0.25795185565948486, 
+            Exact Match: 0.5145118733509235, Multilabel Accuracy: 0.9387276458516564, F1 Macro: 0.7621878167634816, F1 Micro: None, Hamming Loss: 0.061272354148343595, 
+            Precision Macro: 0.8419032310858126, Recall Macro: 0.7052034180038708, Jaccard Macro: 0.6351984157248516, Precision Micro: 0.8312611012433393, 
+            Recall Micro: 0.718158567774936, Jaccard Micro: 0.6267857142857143
+2025-02-04 13:47:43,657 - Epoch: 63.0, Eval Loss: 0.2578641474246979, 
+            Exact Match: 0.5127528583992964, Multilabel Accuracy: 0.9390208150102609, F1 Macro: 0.7636421706100106, F1 Micro: None, Hamming Loss: 0.06097918498973908, 
+            Precision Macro: 0.843334010856958, Recall Macro: 0.7046413555057257, Jaccard Macro: 0.6365474107848806, Precision Micro: 0.8360263315380012, 
+            Recall Micro: 0.7145780051150895, Jaccard Micro: 0.62673844773441
+2025-02-04 13:47:58,712 - Epoch: 64.0, Eval Loss: 0.25626814365386963, 
+            Exact Match: 0.5153913808267371, Multilabel Accuracy: 0.9388742304309586, F1 Macro: 0.7675690121074673, F1 Micro: None, Hamming Loss: 0.06112576956904134, 
+            Precision Macro: 0.8384274269708202, Recall Macro: 0.713322919637267, Jaccard Macro: 0.6417919541464273, Precision Micro: 0.829512051734274, 
+            Recall Micro: 0.7217391304347827, Jaccard Micro: 0.6285077951002227
+2025-02-04 13:48:13,752 - Epoch: 65.0, Eval Loss: 0.26119765639305115, 
+            Exact Match: 0.5162708883025505, Multilabel Accuracy: 0.9394605687481677, F1 Macro: 0.7638937077650153, F1 Micro: None, Hamming Loss: 0.06053943125183231, 
+            Precision Macro: 0.8449645960150037, Recall Macro: 0.7053085789558691, Jaccard Macro: 0.6376375628047372, Precision Micro: 0.8386322735452909, 
+            Recall Micro: 0.7150895140664961, Jaccard Micro: 0.6285971223021583
+2025-02-04 13:48:28,789 - Epoch: 66.0, Eval Loss: 0.2593487799167633, 
+            Exact Match: 0.5118733509234829, Multilabel Accuracy: 0.9387276458516564, F1 Macro: 0.7621332510978834, F1 Micro: None, Hamming Loss: 0.061272354148343595, 
+            Precision Macro: 0.8366812882386148, Recall Macro: 0.7068530302155983, Jaccard Macro: 0.6346853586060699, Precision Micro: 0.8324420677361853, 
+            Recall Micro: 0.7166240409207161, Jaccard Micro: 0.6262852033974072
+2025-02-04 13:48:43,834 - Epoch: 67.0, Eval Loss: 0.2607211172580719, 
+            Exact Match: 0.5127528583992964, Multilabel Accuracy: 0.9392406918792143, F1 Macro: 0.762786079075359, F1 Micro: None, Hamming Loss: 0.06075930812078569, 
+            Precision Macro: 0.8383520995728632, Recall Macro: 0.7069896203429531, Jaccard Macro: 0.6357786668349771, Precision Micro: 0.8363201911589009, 
+            Recall Micro: 0.7161125319693095, Jaccard Micro: 0.6280843427545985
+2025-02-04 13:48:58,854 - Epoch: 68.0, Eval Loss: 0.2601780891418457, 
+            Exact Match: 0.5101143359718557, Multilabel Accuracy: 0.9388742304309586, F1 Macro: 0.7626998860667257, F1 Micro: None, Hamming Loss: 0.06112576956904134, 
+            Precision Macro: 0.83959714479447, Recall Macro: 0.7057215400829092, Jaccard Macro: 0.6356154164698028, Precision Micro: 0.8342277877161598, 
+            Recall Micro: 0.7156010230179028, Jaccard Micro: 0.6265114196148679
+2025-02-04 13:49:13,882 - Epoch: 69.0, Eval Loss: 0.26122933626174927, 
+            Exact Match: 0.5092348284960422, Multilabel Accuracy: 0.9385810612723542, F1 Macro: 0.7616514965390054, F1 Micro: None, Hamming Loss: 0.06141893872764585, 
+            Precision Macro: 0.8385765406780122, Recall Macro: 0.7059330986572313, Jaccard Macro: 0.634490407683369, Precision Micro: 0.8310610551274452, 
+            Recall Micro: 0.7171355498721228, Jaccard Micro: 0.6258928571428571
+2025-02-04 13:49:28,903 - Epoch: 70.0, Eval Loss: 0.2620871663093567, 
+            Exact Match: 0.5118733509234829, Multilabel Accuracy: 0.9388009381413075, F1 Macro: 0.7610098523281122, F1 Micro: None, Hamming Loss: 0.06119906185869246, 
+            Precision Macro: 0.8426267490890907, Recall Macro: 0.701564600635037, Jaccard Macro: 0.6334975426342248, Precision Micro: 0.8353293413173652, 
+            Recall Micro: 0.7135549872122762, Jaccard Micro: 0.625560538116592
+2025-02-04 13:49:43,915 - Epoch: 71.0, Eval Loss: 0.26236656308174133, 
+            Exact Match: 0.5101143359718557, Multilabel Accuracy: 0.9382145998240985, F1 Macro: 0.7591021049385301, F1 Micro: None, Hamming Loss: 0.06178540017590149, 
+            Precision Macro: 0.8353849600729056, Recall Macro: 0.7032895878146567, Jaccard Macro: 0.6311793734572979, Precision Micro: 0.8305588585017836, 
+            Recall Micro: 0.7145780051150895, Jaccard Micro: 0.6236607142857142
+2025-02-04 13:50:01,298 - Epoch: 72.0, Eval Loss: 0.26365336775779724, 
+            Exact Match: 0.5109938434476693, Multilabel Accuracy: 0.938507768982703, F1 Macro: 0.759234731309502, F1 Micro: None, Hamming Loss: 0.06149223101729698, 
+            Precision Macro: 0.8384627113812514, Recall Macro: 0.7019847382602401, Jaccard Macro: 0.6316930752536328, Precision Micro: 0.834131736526946, 
+            Recall Micro: 0.7125319693094629, Jaccard Micro: 0.6241039426523297
+2025-02-04 13:50:16,356 - Epoch: 73.0, Eval Loss: 0.26347577571868896, 
+            Exact Match: 0.5109938434476693, Multilabel Accuracy: 0.9387276458516564, F1 Macro: 0.7600728494798359, F1 Micro: None, Hamming Loss: 0.061272354148343595, 
+            Precision Macro: 0.8403255485698414, Recall Macro: 0.7024988352316615, Jaccard Macro: 0.6327891300787308, Precision Micro: 0.8344291691572027, 
+            Recall Micro: 0.7140664961636829, Jaccard Micro: 0.6254480286738351
+2025-02-04 13:50:31,399 - Epoch: 74.0, Eval Loss: 0.26214244961738586, 
+            Exact Match: 0.5118733509234829, Multilabel Accuracy: 0.9385810612723542, F1 Macro: 0.7594187934425153, F1 Micro: None, Hamming Loss: 0.06141893872764585, 
+            Precision Macro: 0.8347262538590606, Recall Macro: 0.7041735590237567, Jaccard Macro: 0.632171535179325, Precision Micro: 0.8326384752829065, 
+            Recall Micro: 0.7150895140664961, Jaccard Micro: 0.6252236135957067
+2025-02-04 13:50:46,438 - Epoch: 75.0, Eval Loss: 0.26140186190605164, 
+            Exact Match: 0.5109938434476693, Multilabel Accuracy: 0.9384344766930519, F1 Macro: 0.760217229303382, F1 Micro: None, Hamming Loss: 0.06156552330694811, 
+            Precision Macro: 0.834835249693275, Recall Macro: 0.7053593125551342, Jaccard Macro: 0.6328323954738936, Precision Micro: 0.8300769686204855, 
+            Recall Micro: 0.7171355498721228, Jaccard Micro: 0.6253345227475469
+2025-02-04 13:51:01,475 - Epoch: 76.0, Eval Loss: 0.2634875178337097, 
+            Exact Match: 0.51363236587511, Multilabel Accuracy: 0.9391673995895632, F1 Macro: 0.7614646556979946, F1 Micro: None, Hamming Loss: 0.060832600410436824, 
+            Precision Macro: 0.842093858778841, Recall Macro: 0.7031382072731532, Jaccard Macro: 0.6345665317236493, Precision Micro: 0.8374325134973005, 
+            Recall Micro: 0.7140664961636829, Jaccard Micro: 0.6271338724168913
+2025-02-04 13:51:16,509 - Epoch: 77.0, Eval Loss: 0.2632679343223572, 
+            Exact Match: 0.51363236587511, Multilabel Accuracy: 0.9388742304309586, F1 Macro: 0.7610505813078666, F1 Micro: None, Hamming Loss: 0.06112576956904134, 
+            Precision Macro: 0.8408058435613507, Recall Macro: 0.7030664806169197, Jaccard Macro: 0.6340550167082063, Precision Micro: 0.8354278874925194, 
+            Recall Micro: 0.7140664961636829, Jaccard Micro: 0.6260089686098654
+2025-02-04 13:51:31,525 - Epoch: 78.0, Eval Loss: 0.2626904547214508, 
+            Exact Match: 0.5118733509234829, Multilabel Accuracy: 0.9386543535620053, F1 Macro: 0.7607344953165561, F1 Micro: None, Hamming Loss: 0.06134564643799472, 
+            Precision Macro: 0.8387655537755806, Recall Macro: 0.7038216179425718, Jaccard Macro: 0.6335973588713335, Precision Micro: 0.833134684147795, 
+            Recall Micro: 0.7150895140664961, Jaccard Micro: 0.625503355704698
+2025-02-04 13:51:37,231 - Epoch: 78.09638554216868, Eval Loss: 0.2626916766166687, 
+            Exact Match: 0.5118733509234829, Multilabel Accuracy: 0.9386543535620053, F1 Macro: 0.7607344953165561, F1 Micro: None, Hamming Loss: 0.06134564643799472, 
+            Precision Macro: 0.8387655537755806, Recall Macro: 0.7038216179425718, Jaccard Macro: 0.6335973588713335, Precision Micro: 0.833134684147795, 
+            Recall Micro: 0.7150895140664961, Jaccard Micro: 0.625503355704698
+2025-02-04 13:51:39,269 - Epoch: 78.09638554216868, Eval Loss: 0.2626916766166687, 
+            Exact Match: 0.5118733509234829, Multilabel Accuracy: 0.9386543535620053, F1 Macro: 0.7607344953165561, F1 Micro: None, Hamming Loss: 0.06134564643799472, 
+            Precision Macro: 0.8387655537755806, Recall Macro: 0.7038216179425718, Jaccard Macro: 0.6335973588713335, Precision Micro: 0.833134684147795, 
+            Recall Micro: 0.7150895140664961, Jaccard Micro: 0.625503355704698
