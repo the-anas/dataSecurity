@@ -79,7 +79,7 @@ class LoggingCallback:
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("updated_multilabel_data/User_Access2.csv")
+dataframe = pd.read_csv("multilabel_data/User_Access.csv")
 
 
 dataframe['Access Type'] = dataframe['Access Type'].apply(ast.literal_eval) # convert string to list

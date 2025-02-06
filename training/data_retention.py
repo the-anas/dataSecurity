@@ -9,7 +9,7 @@ import logging
 import os
 import torch
 import torch.nn as nn
-from transformers import DistilBertModel, PreTrainedModel, DistilBertConfig
+from transformers import DistilBertModel, DistilBertConfig
 import ast
 import numpy as np
 
@@ -72,7 +72,7 @@ class LoggingCallback(TrainerCallback):
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("updated_multilabel_data/Data_Retention2.csv")
+dataframe = pd.read_csv("multilabel_data/Data_Retention.csv")
 
 
 # Preprocessing

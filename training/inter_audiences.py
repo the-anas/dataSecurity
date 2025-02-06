@@ -1,4 +1,4 @@
-from transformers import TrainerCallback, DistilBertTokenizer, DistilBertForSequenceClassification, AdamW
+from transformers import TrainerCallback, DistilBertTokenizer, DistilBertForSequenceClassification
 from transformers import Trainer, TrainingArguments
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -57,11 +57,8 @@ class LoggingCallback(TrainerCallback):
         return control
 
 
-
-
-
 # Short exploration with pandas
-dataframe = pd.read_csv("updated_multilabel_data/Inter_Aud2.csv")
+dataframe = pd.read_csv("multilabel_data/Inter_Aud.csv")
 
 #rename column for huggingface API
 dataframe.rename(columns={'Audience Type': 'labels'}, inplace=True)

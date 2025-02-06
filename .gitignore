@@ -4,6 +4,5 @@
 #*.csv
 *.pkl
 *.log
-*.txt
 /data_security
 /processed_data

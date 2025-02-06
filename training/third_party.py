@@ -1,5 +1,5 @@
 import pandas as pd
-from transformers import TrainerCallback, DistilBertTokenizer
+from transformers import TrainerCallback, DistilBertTokenizer, AdamW, DistilBertModel, PreTrainedModel, DistilBertConfig
 from sklearn.model_selection import train_test_split
 from torch.utils.data import TensorDataset, DataLoader
 from sklearn.metrics import f1_score, hamming_loss
@@ -9,8 +9,6 @@ import numpy as np
 import os
 import ast
 import torch
-from transformers import AdamW
-from transformers import DistilBertModel, PreTrainedModel, DistilBertConfig
 import torch.nn as nn
 
 EPOCHS = 70
@@ -71,7 +69,7 @@ class LoggingCallback(TrainerCallback):
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("updated_multilabel_data/Third_Party2.csv")
+dataframe = pd.read_csv("multilabel_data/Third_Party.csv")
 
 # Preprocessing
 

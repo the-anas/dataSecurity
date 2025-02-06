@@ -1,5 +1,5 @@
 from torch.utils.data import DataLoader
-from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, AdamW, Trainer, TrainingArguments, TrainerCallback
+from transformers import DistilBertTokenizer, DistilBertForSequenceClassification, Trainer, TrainingArguments, TrainerCallback
 from transformers import Trainer, TrainingArguments
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -64,7 +64,7 @@ class LoggingCallback(TrainerCallback):
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("./updated_multilabel_data/Data_Security2.csv")
+dataframe = pd.read_csv("./multilabel_data/Data_Security.csv")
 
 #rename column for huggingface API
 dataframe.rename(columns={'Security Measure': 'label'}, inplace=True)

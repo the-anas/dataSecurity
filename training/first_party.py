@@ -76,7 +76,7 @@ class LoggingCallback(TrainerCallback):
 
 
 # Short exploration with pandas
-dataframe = pd.read_csv("updated_multilabel_data/First_Party2.csv")
+dataframe = pd.read_csv("multilabel_data/First_Party.csv")
 
 # Preprocessing
 dataframe['Personal Information Type'] = dataframe['Personal Information Type'].apply(ast.literal_eval) # convert string to list

@@ -69,7 +69,7 @@ class LoggingCallback(TrainerCallback):
 
 
 # Loading and processing data
-with open("./processed_data/agg_data.pkl",'rb') as dataframe_file:
+with open("./seperated_categories/agg_data.pkl",'rb') as dataframe_file:
   opened_dataframe = pickle.load(dataframe_file)
 
 opened_dataframe['label'] = opened_dataframe['label'].apply(lambda x: [float(i) for i in x])
